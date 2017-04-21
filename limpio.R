@@ -108,7 +108,10 @@
   # Aplicamos la siguiente función para crear un ID único para cada cédula y 
   # eliminamos las variables de nombre y cédula:
   
-  data$ID <- asignar.ID(data$identificacion, data$nombre)
+  data$ID <- asignar.ID(data$identificacion, data$nombre, na.especial = F)
+  
+  ## APARTADO PARA CORREGIR NA'S##
+  
   data$identificacion <- NULL
   data$nombre <- NULL
   data <- data[c(18, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17)]

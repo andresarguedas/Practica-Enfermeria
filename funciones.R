@@ -55,8 +55,7 @@
         if(length(unique(x[y == unique(y[is.na(x)])[i]])) == 1) {
           ID[y == unique(y[is.na(x)])[i]] <- IDt
         } else {
-          v <- (x[y == unique(y[is.na(x)])[i]])
-                 [!is.na(x[y == unique(y[is.na(x)])[i]])]
+          v <- (x[y == unique(y[is.na(x)])[i]])[!is.na(x[y == unique(y[is.na(x)])[i]])]
           for(j in 1:length(v)) {
             ID[x == v[j]] <- IDt
           }
