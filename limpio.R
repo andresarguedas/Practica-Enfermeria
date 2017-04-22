@@ -110,7 +110,28 @@
   
   data$ID <- asignar.ID(data$identificacion, data$nombre, na.especial = F)
   
-  ## APARTADO PARA CORREGIR NA'S##
+  # El ID dado a los NA´s es el 70119, por lo que ahora vamos a ver el número de
+  # paciente de los NA's y si para alguien con ese mismo número de paciente hay
+  # un ID distinto, entonces se le asigna ese ID:
+  
+  v.na <- unique(data$paciente[is.na(data$id)])
+  
+  for(i in 1:length(unique(data$paciente[is.na(data$id)]))) {
+    print(unique(data$ID[data$paciente == v.na[i]]))
+  }
+  
+  for(k in 1:9) {
+    data$ID[data$paciente == v.na[k]] <- max(data$ID) + 1
+  }
+  
+  data$ID[data$paciente == v.na[10]] <- 99288
+  
+  for(l in 11:31) {
+    data$ID[data$paciente == v.na[l]] <- max(data$ID) + 1
+  }
+  
+  # Teniendo los ID's listos y los NA's revisados, procedemos a eliminar las 
+  # variables restantes:
   
   data$identificacion <- NULL
   data$nombre <- NULL
