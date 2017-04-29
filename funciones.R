@@ -64,7 +64,7 @@
   # basados en la palabra que le sigue, es decir, no tomar en cuenta el 3 en 
   # "durante 3 meses".
   
-  extraer.numeros <- function(x, dosis = T, frecuencia = T) {
+  extraer.numeros <- function(x) {
     if(is.character(x) == F) {
       stop("El argumento ocupa ser un vector de caracteres")
     }
@@ -73,31 +73,46 @@
     x %<>% gsub("tableta", "", ., ignore.case = T)
     x %<>% gsub("media veces", " ", ., ignore.case = T)
     x %<>% gsub("  ", " ", .)
+    x %<>% gsub("bid", " 2 veces y ", .)
+    x %<>% gsub("tid", " 3 veces y ", .)
+    x %<>% gsub("[.]\\(?[0-9/]+\\)?", "", .)
     x %<>% texto.a.numero()
+    x %<>% gsub("1 1/2", "1/2", .)
     x %<>% gsub("[(] \\(?[0-9/]+\\)? [)]", " ", .)
-    x %<>% gsub("[**].*", " ", .)
+    x %<>% gsub("[/]\\(?[0-9/]+\\)?[/]$", " ", .)
+    x %<>% gsub("[/]\\(?[0-9/]+\\)?[/]", " ", .)
+    x %<>% gsub("[/]\\(?[0-9/]+\\)?[/][.]$", " ", .)
     x %<>% gsub("[/][/].*", " ", .)
+    x %<>% gsub("[/][*].*", " ", .)
+    x %<>% gsub("[**].*", " ", .)
     x %<>% gsub("[+][+].*", " ", .)
     x %<>% gsub("[.][.].*", " ", .)
     x %<>% gsub("[-][-].*", " ", .)
     x %<>% gsub("[<].*", " ", .)
-    x %<>% gsub("bid", " 2 veces y ", .)
-    x %<>% gsub("tid", " 3 veces y ", .)
+    x %<>% gsub(" [/] ", " ", .)
+    x %<>% gsub("am,md", " 2 veces y ", .)
+    x %<>% gsub("am y md", " 2 veces y ", .)
     x %<>% gsub("c-\\(?[0-9/]+\\)?", " ", .)
+    x %<>% gsub("\\(?[0-9/]+\\)? mes", " ", .)
+    x %<>% gsub("\\(?[0-9/]+\\)?mes", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? meses", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)?meses", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? semanas", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? dias", " ", .)
-    x %<>% gsub("llevo \\(?[0-9/]+\\)?", " ", .)
+    x %<>% gsub("\\(?[0-9/]+\\)? dia", " ", .)
+    x %<>% gsub("\\(?[0-9/]+\\)? noches", " ", .)
+    x %<>% gsub("\\(?[0-9/]+\\)? de la noche", " ", .)
+    x %<>% gsub("llevo.*", " ", .)
+    x %<>% gsub("lleva.*", " ", .)
     x %<>% gsub("retiro \\(?[0-9/]+\\)?", " ", .)
     x %<>% gsub("hace \\(?[0-9/]+\\)?", " ", .)
+    x %<>% gsub("[0-9]$", "", .)
     x %<>% gsub("horas\\(?[0-9/]+\\)?", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)?d", " ", .)
+    x %<>% gsub("\\(?[0-9/]+\\)? d$", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)?:\\(?[0-9/]+\\)?", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? pm", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? p.m.", " ", .)
     x %<>% gsub("m4", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)?pm", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)?p.m.", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? de la tarde", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? cc", " ", .)
@@ -109,51 +124,56 @@
     x %<>% gsub("  ", " ", ., fixed = T)
     for(i in 1:length(strsplit(x, split = " y ")[[1]])) {
       y <- unlist(strsplit(x, split = " y "))[i]
-      k <- 1
-      ##AGREGAR SOLUCIÓN PARA PUNTOS ENTRE NÚMEROS##
-      if(length(grep("c/\\(?[0-9/]+\\)?", y)) > 0) {
-        k <- 24 / as.numeric(str_extract_all(str_extract_all(y, "c/\\(?[0-9]+\\)?")[[1]], 
-                                             "\\(?[0-9]+\\)?")[[1]])
-        y %<>% gsub("c/\\(?[0-9/]+\\)?", " ", .)
-      }
-      if(length(grep("cada \\(?[0-9/]+\\)? horas", y)) > 0) {
-        k <- 24 / as.numeric(str_extract_all(str_extract_all(y, "cada \\(?[0-9/]+\\)? horas")[[1]], 
-                                             "\\(?[0-9/]+\\)?")[[1]])
-        y %<>% gsub("cada \\(?[0-9/]+\\)? horas", " ", .)
-      }
-      if(length(grep("\\(?[0-9/]+\\)? veces", y)) > 0) {
-        k <- as.numeric(str_extract_all(str_extract_all(y, "\\(?[0-9/]+\\)? veces")[[1]], 
-                                        "\\(?[0-9/]+\\)?")[[1]])
-        y %<>% gsub("\\(?[0-9/]+\\)? veces", " ", .)
-      }
-      y %<>% gsub("\\(?[0-9/]+\\)?h ", " ", .)
-      y %<>% gsub("\\(?[0-9/]+\\)?h[)]", " ", .)
-      num <- str_extract_all(y, "\\(?[0-9/]+\\)?")[[1]]
-      if(length(grep("/", num)) != 0) {
-        num %<>% fraccion.a.numero()
-      }
-      nums <- destring(num, keep = "0-9./")
-      d1 <- sum(nums)
-      f1 <- length(nums)
-      if(k > 1) {
-        f1 <- f1 * k
-        d1 <- d1 * f1
+      if(y != x & length(grep("caso n", y)) > 0) {
+        d1 <- 0
+        f1 <- 0
+      } else {
+        k <- 1
+        ##AGREGAR SOLUCIÓN PARA PUNTOS ENTRE NÚMEROS##
+        if(length(grep("c/\\(?[0-9/]+\\)?", y)) > 0) {
+          k <- 24 / as.numeric(str_extract_all(str_extract_all(y, "c/\\(?[0-9]+\\)?")[[1]], 
+                                               "\\(?[0-9]+\\)?")[[1]])
+          y %<>% gsub("c/\\(?[0-9/]+\\)?", " ", .)
+        }
+        if(length(grep("cada \\(?[0-9/]+\\)? horas", y)) > 0) {
+          k <- 24 / as.numeric(str_extract_all(str_extract_all(y, "cada \\(?[0-9/]+\\)? horas")[[1]], 
+                                               "\\(?[0-9/]+\\)?")[[1]])
+          y %<>% gsub("cada \\(?[0-9/]+\\)? horas", " ", .)
+        }
+        if(length(grep("\\(?[0-9/]+\\)? veces", y)) > 0) {
+          k <- as.numeric(str_extract_all(str_extract_all(y, "\\(?[0-9/]+\\)? veces")[[1]], 
+                                          "\\(?[0-9/]+\\)?")[[1]])
+          y %<>% gsub("\\(?[0-9/]+\\)? veces", " ", .)
+        }
+        if(length(grep("/", y)) != 0) {
+          aa <- strsplit(y, "")[[1]]
+          v1 <- which(strsplit(y, "")[[1]] == "/")
+          y1 <- vector(length = length(v1))
+          for(i in 1:length(v1)) {
+            ifelse(v1[i] == 1 | v1[i] == nchar(y), y1[i] <- FALSE, 
+                     y1[i] <- aa[v1[i] - 1] %in% paste(0:9) & aa[v1[i] + 1] %in% paste(0:9))
+            }
+          aa[v1[!y1]] <- " "
+          y <- paste(aa, collapse = "")
+        }
+        y %<>% gsub("\\(?[0-9/]+\\)?h ", " ", .)
+        y %<>% gsub("\\(?[0-9/]+\\)?h[)]", " ", .)
+        num <- str_extract_all(y, "\\(?[0-9/]+\\)?")[[1]]
+        if(length(grep("/", num)) != 0) {
+          num %<>% fraccion.a.numero()
+        }
+        nums <- destring(num, keep = "0-9./")
+        d1 <- sum(nums)
+        f1 <- length(nums)
+        if(k > 1) {
+          f1 <- f1 * k
+          d1 <- d1 * f1
+        }
       }
       d <- d + d1
       f <- f + f1
     }
-    if(!dosis & !frecuencia) {
-      return(nums)
-    }
-    if(dosis & !frecuencia) {
-      return(d)
-    }
-    if(!dosis & frecuencia) {
-      return(f)
-    }
-    if(dosis & frecuencia) {
-      return(c(d, f))
-    }
+    return(c(d, f))
   }
   
   # Esta función asigna un ID numérico único por cada elemento único de un 
