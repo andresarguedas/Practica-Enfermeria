@@ -29,12 +29,15 @@
   
   texto.a.numero <- function(x) {
     x %<>% tolower()
+    x %<>% gsub("un octavo", "1/8", .)
     x %<>% gsub("una y media", "3/2", .)
+    x %<>% gsub("dos y media", "5/2", .)
     x %<>% gsub("media", "1/2", .)
     x %<>% gsub("un cuarto", "1/4", .)
     x %<>% gsub("tres cuartos", "3/4", .)
     x %<>% gsub("una y tres cuartos", "7/4", .)
     x %<>% gsub("treinta y cinco", "35", .)
+    x %<>% gsub("dos y medio", "5/2", .)
     numeros <- list(cero = 0, uno = 1, una = 1, dos = 2, tres = 3, 
                     cuatro = 4, cinco = 5, seis = 6, siete = 7, ocho = 8, 
                     nueve = 9, diez = 10, once = 11, doce = 12, trece = 13, 
@@ -51,9 +54,10 @@
     wsplit <- unlist(strsplit(x, " "))
     for(i in 1:length(wsplit)) {
       if(wsplit[i] %in% names(numeros)) {
-        x %<>% gsub(wsplit[i], as.character(numeros[wsplit[i]]), .)
+        wsplit[i] %<>% gsub(., as.character(numeros[.]), .)
       }
     }
+    x <- paste0(wsplit, collapse = " ")
     return(x)
   }
   
@@ -76,8 +80,11 @@
     x %<>% gsub("bid", " 2 veces y ", .)
     x %<>% gsub("tid", " 3 veces y ", .)
     x %<>% gsub("[.]\\(?[0-9/]+\\)?", "", .)
+    x %<>% gsub("\\s*\\([^\\)]+\\)", "", .)
+    x %<>% gsub(" I ", " Y ", .)
     x %<>% texto.a.numero()
-    x %<>% gsub("1 1/2", "1/2", .)
+    x %<>% gsub("\\(?[0-9/]+\\)?[/]\\(?[0-9/]+\\)?[/]\\(?[0-9/]+\\)?", " ", .)
+    x %<>% gsub("\\(?[0-9/]+\\)? [/]\\(?[0-9/]+\\)?[/]\\(?[0-9/]+\\)?", " ", .)
     x %<>% gsub("[(] \\(?[0-9/]+\\)? [)]", " ", .)
     x %<>% gsub("[/]\\(?[0-9/]+\\)?[/]$", " ", .)
     x %<>% gsub("[/]\\(?[0-9/]+\\)?[/]", " ", .)
@@ -97,6 +104,7 @@
     x %<>% gsub("\\(?[0-9/]+\\)?mes", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? meses", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)?meses", " ", .)
+    x %<>% gsub("\\(?[0-9/]+\\)? semana", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? semanas", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? dias", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? dia", " ", .)
@@ -104,16 +112,30 @@
     x %<>% gsub("\\(?[0-9/]+\\)? de la noche", " ", .)
     x %<>% gsub("llevo.*", " ", .)
     x %<>% gsub("lleva.*", " ", .)
-    x %<>% gsub("retiro \\(?[0-9/]+\\)?", " ", .)
+    x %<>% gsub("retiro.*", " ", .)
+    x %<>% gsub("pendiente.*", " ", .)
+    x %<>% gsub("ajusta.*", " ", .)
+    x %<>% gsub("ajuste.*", " ", .)
+    x %<>% gsub("completar.*", " ", .)
+    x %<>% gsub("receta.*", " ", .)
     x %<>% gsub("hace \\(?[0-9/]+\\)?", " ", .)
     x %<>% gsub("[0-9]$", "", .)
     x %<>% gsub("horas\\(?[0-9/]+\\)?", " ", .)
+    x %<>% gsub("\\(?[0-9/]+\\)? min", " ", .)
+    x %<>% gsub("x \\(?[0-9/]+\\)? d", " ", .)
+    x %<>% gsub("por \\(?[0-9/]+\\)? d", " ", .)
+    x %<>% gsub("por \\(?[0-9/]+\\)?.", " ", .)
+    x %<>% gsub("por \\(?[0-9/]+\\)? h", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)?d", " ", .)
+    x %<>% gsub("# \\(?[0-9/]+\\)?", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? d$", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)?:\\(?[0-9/]+\\)?", " ", .)
+    x %<>% gsub("\\(?[0-9/]+\\)? :\\(?[0-9/]+\\)?", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? p.m.", " ", .)
     x %<>% gsub("m4", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)?p.m.", " ", .)
+    x %<>% gsub("[(]\\(?[0-9/]+\\)?am[)]", " ", .)
+    x %<>% gsub("[(]\\(?[0-9/]+\\)?pm[)]", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? de la tarde", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? cc", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? cucharada", " ", .)
@@ -140,10 +162,10 @@
                                                "\\(?[0-9/]+\\)?")[[1]])
           y %<>% gsub("cada \\(?[0-9/]+\\)? horas", " ", .)
         }
-        if(length(grep("\\(?[0-9/]+\\)? veces", y)) > 0) {
-          k <- as.numeric(str_extract_all(str_extract_all(y, "\\(?[0-9/]+\\)? veces")[[1]], 
+        if(length(grep("\\(?[0-9/]+\\)? vec", y)) > 0) {
+          k <- as.numeric(str_extract_all(str_extract_all(y, "\\(?[0-9/]+\\)? vec")[[1]], 
                                           "\\(?[0-9/]+\\)?")[[1]])
-          y %<>% gsub("\\(?[0-9/]+\\)? veces", " ", .)
+          y %<>% gsub("\\(?[0-9/]+\\)? vec", " ", .)
         }
         if(length(grep("/", y)) != 0) {
           aa <- strsplit(y, "")[[1]]
