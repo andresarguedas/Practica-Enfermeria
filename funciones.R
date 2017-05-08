@@ -72,6 +72,9 @@
     if(is.character(x) == F) {
       stop("El argumento ocupa ser un vector de caracteres")
     }
+    if(x == "") {
+      return(c(0, 0))
+    } else {
     d <- 0
     f <- 0
     x %<>% gsub("tableta", "", ., ignore.case = T)
@@ -100,24 +103,25 @@
     x %<>% gsub("am,md", " 2 veces y ", .)
     x %<>% gsub("am y md", " 2 veces y ", .)
     x %<>% gsub("c-\\(?[0-9/]+\\)?", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? mes", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)?mes", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? meses", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)?meses", " ", .)
+    x %<>% gsub("\\(?[0-9/]+\\)? mes.*", " ", .)
+    x %<>% gsub("\\(?[0-9/]+\\)?mes.*", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? semana", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? semanas", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? dias", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? dia", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? noches", " ", .)
     x %<>% gsub("\\(?[0-9/]+\\)? de la noche", " ", .)
-    x %<>% gsub("llevo.*", " ", .)
-    x %<>% gsub("lleva.*", " ", .)
+    x %<>% gsub("inicia.*", " ", .)
+    x %<>% gsub("hasta.*", " ", .)
+    x %<>% gsub("llev.*", " ", .)
     x %<>% gsub("retiro.*", " ", .)
     x %<>% gsub("pendiente.*", " ", .)
     x %<>% gsub("ajusta.*", " ", .)
     x %<>% gsub("ajuste.*", " ", .)
     x %<>% gsub("completar.*", " ", .)
     x %<>% gsub("receta.*", " ", .)
+    x %<>% gsub("del.*", " ", .)
+    x %<>% gsub("fecha.*", " ", .)
     x %<>% gsub("hace \\(?[0-9/]+\\)?", " ", .)
     x %<>% gsub("[0-9]$", "", .)
     x %<>% gsub("horas\\(?[0-9/]+\\)?", " ", .)
@@ -196,6 +200,7 @@
       f <- f + f1
     }
     return(c(d, f))
+    }
   }
   
   # Esta función asigna un ID numérico único por cada elemento único de un 

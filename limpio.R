@@ -2,9 +2,9 @@
   
   # Primero, cargamos las librerías que ocupamos para este script:
   
-  library(memisc)
-  library(magrittr)
-  library(lubridate)
+  x <- c("memisc", "magrittr", "lubridate", "doParallel")
+  lapply(x, library, character.only = T)
+  remove(x)
   
   # Ahora, sourceamos las funciones necesarias para la limpieza de la base:
   
@@ -136,6 +136,16 @@
   data$identificacion <- NULL
   data$nombre <- NULL
   data <- data[c(18, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17)]
+  
+  # Necesitamos agregar la dosis y la frecuencia a la base:
+  
+  registerDoParallel(cores = 8)
+  
+  data[, 14:15] <- foreach::foreach(i = 1:nrow(data), .combine = rbind, .packages = c("stringr", "taRifx", "magrittr")) %dopar% {
+    extraer.numeros(data$indicacion[i])
+  }
+  
+  stopImplicitCluster()
   
   # Ahora, guardamos la base completa y limpia:
   
