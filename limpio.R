@@ -147,10 +147,138 @@
   
   stopImplicitCluster()
   
+  # Para empezar la limpieza de la base, ocupamos encontrar aquellos casos en 
+  # los cuales el algoritmo presenta algún problema. En este caso, se va a 
+  # seleccionar a aquellos donde la dosis o la frecuencia es 0, lo cual no puede
+  # suceder:
+  
+  ceros <- which(clon$dosis == 0 | clon$frecuencia == 0)
+  
+  # El siguiente csv contiene las dosis y frecuencias corregidas para los casos 
+  # presentados anteriormente:
+  
+  correccion.ceros <- read.csv2("corrections/clonazepam/correccion ceros.csv")
+  
+  # Con el archivo de correcciones cargado, vamos a reemplazar estos valores en 
+  # la base:
+  
+  data[ceros, 14:15] <- correccion.ceros
+  
+  # Para mantener el orden, vamos a eliminar las variables anteriores:
+  
+  remove(ceros, correccion.ceros)
+  
+  # El siguiente paso es ver si hay algún NA en la base:
+  
+  which(is.na(data$dosis))
+  data[174412, ]
+  
+  # Procedemos a cambiar el NA anterior por un 999, para poder omitirlo más 
+  # facilmente de la limpieza posterior:
+  
+  data$dosis[174412] <- 999
+  data$frecuencia[174412] <- 999
+  
+  # Ahora, vamos a ver si hay algún dato en el cual la dosis sea mayor a 1000, 
+  # para evitar problemas con los NA's:
+  
+  which(data$dosis > 1000)
+  data[197900, ]
+  
+  # Corregimos el caso anterior:
+  
+  data$dosis[197900] <- 60
+  data$frecuencia[197900] <- 3
+  
+  # Por último, revisamos si hay alguna frecuencia que no sea entera:
+  
+  which(data$frecuencia%%1 != 0)
+  data[10074, ]
+  
+  data$dosis[10074] <- 7
+  data$frecuencia[10074] <- 1
+  
+  # El siguiente paso es agregar la variable de presentación a los datos que no 
+  # lo tienen. En este caso, una presentación de 1 es para tabletas y una 
+  # presentación de 2 es para cápsulas. Ya que ninguna de los casos en la base 
+  # de gotas tiene presentación entonces vamos a ponerle presentación de 2 a 
+  # todos aquellos que no tengan presentación:
+  
+  data$presentacion[which(data$presentacion == 0)] <- 2
+  
+  # Para hacer el análisis de casos extremos vamos a quitar los NA's, para que 
+  # no generen ruido:
+  
+  data1 <- subset(data, data$dosis < 999)
+  
+  # Ya que la distribución de la dosis es distinta entre tabletas y gotas, vamos
+  # a agregar la dosis en miligramos como una forma de estandarizar esta 
+  # variable entre las dos presentaciones del medicamento, para poder hacer un 
+  # análisis de casos extremos de forma conjunta:
+  
+  registerDoParallel(cores = 8)
+  
+  data1$mg <- foreach::foreach(i = 1:701834, .combine = rbind, .packages = c("stringr", "taRifx", "magrittr")) %dopar% {
+    ifelse(data1$presentacion[i] == 1, 2 * data1$dosis[i], 0.125 * data1$dosis[i])
+  }
+  
+  stopImplicitCluster()
+  
+  # Para la detección de casos extremos vamos a usar los hat-values con las 
+  # variables de interés, dosis en miligramos y frecuencia:
+  
+  h <- hat(clon1[, c(15, 18)])
+  
+  # Ahora, vamos a tomar como casos extremos solo aquellos en los cuales el 
+  # hat-value sea mayor a 10 veces la media de los hat-values, para poder 
+  # trabajar con un número reducido de casos extremos dado el tamaño total de la
+  # base de datos:
+  
+  v.extremos <- which(h > 10 * mean(h))
+  
+  # Cargamos el archivo csv con las correcciones en la dosis y la frecuencia de 
+  # los casos extremos obtenidos anteriormente:
+  
+  correccion.extremos <- read.csv2("corrections/clonazepam/correccion casos extremos.csv")
+  
+  # Reemplazamos la dosis y la frecuencia de la base con la corregida:
+  
+  data1[v.extremos, 14:15] <- correccion.extremos
+  
+  # Ahora, para los casos corregidos anteriormente, vamos a volver a calcular la
+  # dosis en miligramos apropiada:
+  
+  for(i in 1:length(v.extremos)) {
+    data1$mg[v.extremos[i]] <- ifelse(data1$descripcion[v.extremos[i]] == "CLONAZEPAM 2 MG TABLETAS", 
+                                      2 * data1$dosis[v.extremos[i]], 
+                                      0.125 * data1$dosis[v.extremos[i]])
+  }
+  
+  # De nuevo, para mantener el orden, borramos las variables usadas 
+  # anteriormente:
+  
+  remove(v.extremos, correccion.extremos)
+  
+  # La dosis en miligramos actualmente no es una variable numérica, por lo que 
+  # la ocupamos cambiar para que lo sea:
+  
+  data1$mg %<>% as.numeric()
+  
+  # Por último, juntamos la base corregida con los NA's que fueron excluidos al 
+  # principio de la limpieza:
+  
+  data.limpio <- rbind(data1, data[which(data$dosis == 999), ])
+  
+  # Ahora, para facilitar el procesamiento de los NA's en análisis posteriores, 
+  # cambiamos los 999 a NA's de verdad:
+  
+  data.limpio$dosis[which(data.limpio$dosis == 999)] <- NA
+  data.limpio$frecuencia[which(data.limpio$frecuencia == 999)] <- NA
+  
   # Ahora, guardamos la base completa y limpia:
   
   dir.create("F:/Proyecto enfermeria/Practica-Enfermeria/data")
-  saveRDS(data, 
+  saveRDS(data.limpio, 
         file = "F:/Proyecto enfermeria/Practica-Enfermeria/data/clonazepam.rds")
 
 ##FIN##=========================================================================

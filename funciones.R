@@ -50,7 +50,8 @@
                     veintiuno = 21, veintiun = 21, veintidos = 22, 
                     veintitres = 23, veinticuatro = 24, veinticinco = 25, 
                     veintiseis = 26, veintisiete = 27, veintiocho = 28, 
-                    veintinueve = 29, treinta = 30)
+                    veintinueve = 29, treinta = 30, cuarenta = 40,
+                    cincuenta = 50, sesenta = 60, setenta = 70)
     wsplit <- unlist(strsplit(x, " "))
     for(i in 1:length(wsplit)) {
       if(wsplit[i] %in% names(numeros)) {
