@@ -2,7 +2,7 @@
   
   # Mediante esto cargamos las libraries requeridas para las funciones.
   
-  x <- c("stringr", "taRifx", "magrittr")
+  x <- c("stringr", "taRifx", "magrittr", "stringdist", "doParallel")
   lapply(x, require, character.only = T)
   remove(x)
   
@@ -156,7 +156,6 @@
         f1 <- 0
       } else {
         k <- 1
-        ##AGREGAR SOLUCIÓN PARA PUNTOS ENTRE NÚMEROS##
         if(length(grep("c/\\(?[0-9/]+\\)?", y)) > 0) {
           k <- 24 / as.numeric(str_extract_all(str_extract_all(y, "c/\\(?[0-9]+\\)?")[[1]], 
                                                "\\(?[0-9]+\\)?")[[1]])
@@ -204,29 +203,219 @@
     }
   }
   
+  # Mediante esta función se puede limpiar el vector de nombres, dado que hay
+  # ciertas palabras que no brindan nada de información y solo generan ruido.
+  
+  limpieza.nombres <- function(x) {
+    x %<>% gsub(" NO.*OTRO", "", .)
+    x %<>% str_replace_all(., "[^[:graph:]]", " ")
+    x %<>% gsub(" NO.*DICA", "", .)
+    x %<>% gsub("NO$", "", .)
+    x %<>% gsub(" NIO", "", .)
+    x %<>% gsub("N I O", "", .)
+    x %<>% gsub("N.I.O", "", .)
+    x %<>% gsub(" NI$", "", .)
+    x %<>% gsub("(NO.*OTRO)", "", .)
+    x %<>% gsub("NOINDIC", "", .)
+    x %<>% gsub("INDEFINIDO", "", .)
+    x %<>% gsub("U.AP", "", .)
+    x %<>% gsub("U.A.P.", "", .)
+    x %<>% gsub("U AP", "", .)
+    x %<>% gsub("DEL SO", "", .)
+    x %<>% gsub("DEL S", "", .)
+    x %<>% gsub("DE LOS S", "", .)
+    x %<>% gsub("DE LA TRIN", "", .)
+    x %<>% gsub("DE LA TRI", "", .)
+    x %<>% gsub("DE LA TR", "", .)
+    x %<>% gsub("DE LA T", "", .)
+    x %<>% gsub("DE LOS ANGE", "", .)
+    x %<>% gsub("DE LOS ANG", "", .)
+    x %<>% gsub("DE LOS AN", "", .)
+    x %<>% gsub("DE LOS A", "", .)
+    x %<>% gsub("DEL LOS ANG", "", .)
+    x %<>% gsub("DE ANGE", "", .)
+    x %<>% gsub("DE SAN G", "", .)
+    x %<>% gsub("DE SAN M", "", .)
+    x %<>% gsub("DE SAN A", "", .)
+    x %<>% gsub("DE SAN B", "", .)
+    x %<>% gsub("DE SAN", "", .)
+    x %<>% gsub("DE SA", "", .)
+    x %<>% gsub("DE GUADA", "", .)
+    x %<>% gsub("DE GUAD", "", .)
+    x %<>% gsub("DE GUA", "", .)
+    x %<>% gsub("DE LAS PIEDA", "", .)
+    x %<>% gsub("DE LAS PIE", "", .)
+    x %<>% gsub("DE LAS P", "", .)
+    x %<>% gsub("DEL PIL ", "", .)
+    x %<>% gsub("DEL PI ", "", .)
+    x %<>% gsub("DE LAS ME", "", .)
+    x %<>% gsub("DE LAS M", "", .)
+    x %<>% gsub("DE LA CAN", "", .)
+    x %<>% gsub("DE LA CO", "", .)
+    x %<>% gsub("DE LA C", "", .)
+    x %<>% gsub("DE CARME", "", .)
+    x %<>% gsub("DEL C", "", .)
+    x %<>% gsub("DEL ROSARIO", "", .)
+    x %<>% gsub("DEL ROSARI", "", .)
+    x %<>% gsub("DEL ROSAR", "", .)
+    x %<>% gsub("DEL ROSA", "", .)
+    x %<>% gsub("DEL ROS", "", .)
+    x %<>% gsub("DEL RO", "", .)
+    x %<>% gsub("DEL R", "", .)
+    x %<>% gsub("DEL ESPI", "", .)
+    x %<>% gsub("DE FATIMA", "", .)
+    x %<>% gsub("DE FAT", "", .)
+    x %<>% gsub("DE F", "", .)
+    x %<>% gsub("DEL GER", "", .)
+    x %<>% gsub("DE GER", "", .)
+    x %<>% gsub("DE GE", "", .)
+    x %<>% gsub("DEL MIL", "", .)
+    x %<>% gsub("DE LOS DOLOR", "", .)
+    x %<>% gsub("DE LOS DO", "", .)
+    x %<>% gsub("DE LOS DESA", "", .)
+    x %<>% gsub("DE LOS SANTOS", "", .)
+    x %<>% gsub("DE JE", "", .)
+    x %<>% gsub("DE J", "", .)
+    x %<>% gsub("DE PIEDA", "", .)
+    x %<>% gsub("DE P", "", .)
+    x %<>% gsub("DEL N", "", .)
+    x %<>% gsub("DEL AUX", "", .)
+    x %<>% gsub("DEL BUSTO", "", .)
+    x %<>% gsub("DE LOS", "", .)
+    x %<>% gsub("DE LAS", "", .)
+    x %<>% gsub(" DEL$", "", .)
+    x %<>% gsub(" DE LO$", "", .)
+    x %<>% gsub("DE LA O", "DELAO", .)
+    x %<>% gsub("DE L", "", .)
+    x %<>% gsub(" D$", "", .)
+    x %<>% gsub(" RA$", "", .)
+    x %<>% gsub(" A$", "", .)
+    x %<>% gsub(" R$", "", .)
+    x %<>% gsub(" MI$", "", .)
+    x %<>% gsub(" C$", "", .)
+    x %<>% gsub(" AN$", "", .)
+    x %<>% gsub(" G$", "", .)
+    x %<>% gsub(" B$", "", .)
+    x %<>% gsub(" DE S$", "", .)
+    x %<>% gsub(" DEL M$", "", .)
+    x %<>% gsub(" DE M$", "", .)
+    x %<>% gsub(" DE DO$", "", .)
+    x %<>% gsub(" AR$", "", .)
+    x %<>% gsub(" DEL PI$", "", .)
+    x %<>% gsub(" DE CL$", "", .)
+    x %<>% gsub(" DE CL ", " ", .)
+    x %<>% gsub(" O ", " ", .)
+    x %<>% gsub(" AR ", " ", .)
+    x %<>% gsub(" DE DO ", " ", .)
+    x %<>% gsub(" DEL M ", " ", .)
+    x %<>% gsub(" DE M ", " ", .)
+    x %<>% gsub(" DE S ", " ", .)
+    x %<>% gsub(" B ", " ", .)
+    x %<>% gsub(" G ", " ", .)
+    x %<>% gsub(" AN ", " ", .)
+    x %<>% gsub(" C ", " ", .)
+    x %<>% gsub(" RA ", " ", .)
+    x %<>% gsub(" A ", " ", .)
+    x %<>% gsub(" D ", " ", .)
+    x %<>% gsub(" R ", " ", .)
+    x %<>% gsub(" MI ", " ", .)
+    x %<>% gsub("^A ", "", .)
+    x %<>% gsub("DELAO", "DE LA O", .)
+    x %<>% gsub("\\s+$", "", .)
+    x %<>% gsub("  ", " ", .)
+    return(x)
+  }
+  
+  # Esta función está solo para ahorrar tiempo y no tener que escribir todo 
+  # muchas veces.
+  
+  u <- function(x) {
+    return(unlist(strsplit(x, " ", fixed = T)))
+  }
+  
+  # Esta función calcula la distancia entre dos nombres y devuelve TRUE si los 
+  # dos nombres son iguales y FALSE si no lo son.
+  
+  f <- function(x, y) {
+    x1 <- u(x)
+    y1 <- u(y)
+    d <- stringdistmatrix(x1, y1)
+    aj <- which(d == 0, arr.ind = T)
+    daj <- which(dist(aj) == 1)
+    while(length(daj) > 0) {
+      b <- aj[combn(1:nrow(aj), 2)[, daj[1]][2], ]
+      d[b[1], b[2]] <- 2
+      aj <- which(d == 0, arr.ind = T)
+      daj <- which(dist(aj) == 1)
+    }
+    if(nrow(d) >= ncol(d)) {
+      a <- apply(d, 2, min)
+    } else {
+      a <- apply(d, 1, min)
+    }
+    return(all(a <= 1))
+  }
+  
+  # Esta función crea grupos entre nombres que le son suministrados, poniendo 
+  # nombres iguales en el mismo grupo.
+  
+  w <- function(x) {
+    y <- x
+    n <- length(x)
+    q <- seq(1:n)
+    p <- vector(length = n)
+    k <- 1
+    while(n > 1) {
+      v <- foreach(i = 2:n, .combine = c, .packages = "stringdist", .export = c("f", "u")) %dopar% {
+        f(y[1], y[i])
+      }
+      h <- which(v == T) + 1
+      if(length(h) > 0) {
+        p[q[c(1, h)]] <- k
+      } else {
+        p[q[1]] <- k
+      }
+      k <- k + 1
+      q <- q[-c(1, h)]
+      y <- y[-c(1, h)]
+      n <- n - length(h) - 1
+    }
+    if(n == 1) {
+      p[q[1]] <- k
+    }
+    return(p)
+  }
+  
   # Esta función asigna un ID numérico único por cada elemento único de un 
   # cierto vector. Aquí el argumento "x" sería la cedula y el argumento "y" el 
-  # nombre, para poder solucionar los casos de NA's. Cuando na.especial = T 
-  # entonces se le asigna un ID especifico a cada uno de los NA's, 
-  # na.especial = F entonces el argumento "y" no es necesario. La función 
-  # regresa un vector con los IDs.
+  # nombre. La función regresa un vector con los IDs.
   
-  asignar.ID <- function(x, y, na.especial = T) {
+  asignar.ID <- function(x, y) {
+    registerDoParallel(cores = 8)
     ID <- match(x, unique(x))
-    if(na.especial) {
-      for(i in 1:length(unique(y[is.na(x)]))) {
-        IDt <- max(ID) + 1
-        if(length(unique(x[y == unique(y[is.na(x)])[i]])) == 1) {
-          ID[y == unique(y[is.na(x)])[i]] <- IDt
-        } else {
-          v <- (x[y == unique(y[is.na(x)])[i]])[!is.na(x[y == unique(y[is.na(x)])[i]])]
-          for(j in 1:length(v)) {
-            ID[x == v[j]] <- IDt
-          }
+    uni <- unique(ID)
+    for(i in 1:length(uni)) {
+      wh <- which(ID == uni[i])
+      IDt <- max(ID)
+      if(length(unique(y[wh])) > 1) {
+        a <- w(y[wh])
+        for(j in 1:length(a)) {
+          ID[wh[j]] <- IDt + a[j]
         }
       }
     }
+    uni1 <- unique(y)
+    for(l in 1:length(uni1)) {
+      wh1 <- unique(ID[which(y == uni1[l])])
+      if(length(wh1) > 1) {
+        c1 <- min(wh1)
+        for(k in 1:length(wh1)) {
+          ID[which(ID == wh1[k])] <- c1
+        }
+      }
+    }
+    stopImplicitCluster()
     return(ID)
   }
-
+  
 ##FIN##=========================================================================

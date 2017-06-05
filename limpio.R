@@ -105,30 +105,14 @@
   data$presentacion %<>% as.factor()
   data$especificacion %<>% as.factor()
   
-  # Aplicamos la siguiente función para crear un ID único para cada cédula y 
-  # eliminamos las variables de nombre y cédula:
+  # Para poder empezar con el análisis para asignar ID's, ocupamos limpiar un
+  # poco los nombres:
   
-  data$ID <- asignar.ID(data$identificacion, data$nombre, na.especial = F)
+  data$nombre %<>% limpieza.nombres()
   
-  # El ID dado a los NA´s es el 70119, por lo que ahora vamos a ver el número de
-  # paciente de los NA's y si para alguien con ese mismo número de paciente hay
-  # un ID distinto, entonces se le asigna ese ID:
+  # Aplicamos la siguiente función para crear un ID único para cada cédula:
   
-  v.na <- unique(data$paciente[is.na(data$id)])
-  
-  for(i in 1:length(unique(data$paciente[is.na(data$id)]))) {
-    print(unique(data$ID[data$paciente == v.na[i]]))
-  }
-  
-  for(k in 1:9) {
-    data$ID[data$paciente == v.na[k]] <- max(data$ID) + 1
-  }
-  
-  data$ID[data$paciente == v.na[10]] <- 99288
-  
-  for(l in 11:31) {
-    data$ID[data$paciente == v.na[l]] <- max(data$ID) + 1
-  }
+  data$ID <- asignar.ID(data$identificacion, data$nombre)
   
   # Teniendo los ID's listos y los NA's revisados, procedemos a eliminar las 
   # variables restantes:
@@ -152,7 +136,7 @@
   # seleccionar a aquellos donde la dosis o la frecuencia es 0, lo cual no puede
   # suceder:
   
-  ceros <- which(clon$dosis == 0 | clon$frecuencia == 0)
+  ceros <- which(data$dosis == 0 | data$frecuencia == 0)
   
   # El siguiente csv contiene las dosis y frecuencias corregidas para los casos 
   # presentados anteriormente:
@@ -227,7 +211,7 @@
   # Para la detección de casos extremos vamos a usar los hat-values con las 
   # variables de interés, dosis en miligramos y frecuencia:
   
-  h <- hat(clon1[, c(15, 18)])
+  h <- hat(data1[, c(15, 18)])
   
   # Ahora, vamos a tomar como casos extremos solo aquellos en los cuales el 
   # hat-value sea mayor a 10 veces la media de los hat-values, para poder 
