@@ -8,7 +8,7 @@
   
   # Ahora, sourceamos las funciones necesarias para la limpieza de la base:
   
-  source('F:/Proyecto enfermeria/Practica-Enfermeria/funciones.R')
+  source(paste(getwd(), "/funciones.R", sep = ""))
   
   # Cargamos el archivo con las tabletas:
   
@@ -259,10 +259,14 @@
   data.limpio$dosis[which(data.limpio$dosis == 999)] <- NA
   data.limpio$frecuencia[which(data.limpio$frecuencia == 999)] <- NA
   
+  # Limpiamos las especialidades:
+  
+  data.limpio$especialidad %<>% limpiar.especialidad()
+  
   # Ahora, guardamos la base completa y limpia:
   
-  dir.create("F:/Proyecto enfermeria/Practica-Enfermeria/data")
+  dir.create(paste(getwd(), "/data", sep = ""))
   saveRDS(data.limpio, 
-        file = "F:/Proyecto enfermeria/Practica-Enfermeria/data/clonazepam.rds")
+        file = paste(getwd(), "/data/clonazepam.rds", sep = ""))
 
 ##FIN##=========================================================================
