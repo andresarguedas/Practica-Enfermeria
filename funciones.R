@@ -13,8 +13,8 @@
     temp <- strsplit(x, split = "/")
     for(i in 1:length(temp)) {
       y <- temp[i]
-      y %<>% unlist()
-      y %<>% destring()
+      y %<>% unlist() %>%
+             destring()
       if(length(y) == 2) {
         temp[i] <- y[1] / y[2]
       } else {
@@ -28,16 +28,16 @@
   # poder ser procesados más fácilmente:
   
   texto.a.numero <- function(x) {
-    x %<>% tolower()
-    x %<>% gsub("un octavo", "1/8", .)
-    x %<>% gsub("una y media", "3/2", .)
-    x %<>% gsub("dos y media", "5/2", .)
-    x %<>% gsub("media", "1/2", .)
-    x %<>% gsub("un cuarto", "1/4", .)
-    x %<>% gsub("tres cuartos", "3/4", .)
-    x %<>% gsub("una y tres cuartos", "7/4", .)
-    x %<>% gsub("treinta y cinco", "35", .)
-    x %<>% gsub("dos y medio", "5/2", .)
+    x %<>% tolower() %>%
+           gsub("un octavo", "1/8", .) %>%
+           gsub("una y media", "3/2", .) %>%
+           gsub("dos y media", "5/2", .) %>%
+           gsub("media", "1/2", .) %>%
+           gsub("un cuarto", "1/4", .) %>%
+           gsub("tres cuartos", "3/4", .) %>%
+           gsub("una y tres cuartos", "7/4", .) %>%
+           gsub("treinta y cinco", "35", .) %>%
+           gsub("dos y medio", "5/2", .)
     numeros <- list(cero = 0, uno = 1, una = 1, dos = 2, tres = 3, 
                     cuatro = 4, cinco = 5, seis = 6, siete = 7, ocho = 8, 
                     nueve = 9, diez = 10, once = 11, doce = 12, trece = 13, 
@@ -78,77 +78,77 @@
     } else {
     d <- 0
     f <- 0
-    x %<>% gsub("tableta", "", ., ignore.case = T)
-    x %<>% gsub("media veces", " ", ., ignore.case = T)
-    x %<>% gsub("  ", " ", .)
-    x %<>% gsub("bid", " 2 veces y ", .)
-    x %<>% gsub("tid", " 3 veces y ", .)
-    x %<>% gsub("[.]\\(?[0-9/]+\\)?", "", .)
-    x %<>% gsub("\\s*\\([^\\)]+\\)", "", .)
-    x %<>% gsub(" I ", " Y ", .)
-    x %<>% texto.a.numero()
-    x %<>% gsub("\\(?[0-9/]+\\)?[/]\\(?[0-9/]+\\)?[/]\\(?[0-9/]+\\)?", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? [/]\\(?[0-9/]+\\)?[/]\\(?[0-9/]+\\)?", " ", .)
-    x %<>% gsub("[(] \\(?[0-9/]+\\)? [)]", " ", .)
-    x %<>% gsub("[/]\\(?[0-9/]+\\)?[/]$", " ", .)
-    x %<>% gsub("[/]\\(?[0-9/]+\\)?[/]", " ", .)
-    x %<>% gsub("[/]\\(?[0-9/]+\\)?[/][.]$", " ", .)
-    x %<>% gsub("[/][/].*", " ", .)
-    x %<>% gsub("[/][*].*", " ", .)
-    x %<>% gsub("[**].*", " ", .)
-    x %<>% gsub("[+][+].*", " ", .)
-    x %<>% gsub("[.][.].*", " ", .)
-    x %<>% gsub("[-][-].*", " ", .)
-    x %<>% gsub("[<].*", " ", .)
-    x %<>% gsub(" [/] ", " ", .)
-    x %<>% gsub("am,md", " 2 veces y ", .)
-    x %<>% gsub("am y md", " 2 veces y ", .)
-    x %<>% gsub("c-\\(?[0-9/]+\\)?", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? mes.*", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)?mes.*", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? semana", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? semanas", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? dias", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? dia", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? noches", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? de la noche", " ", .)
-    x %<>% gsub("inicia.*", " ", .)
-    x %<>% gsub("hasta.*", " ", .)
-    x %<>% gsub("llev.*", " ", .)
-    x %<>% gsub("retiro.*", " ", .)
-    x %<>% gsub("pendiente.*", " ", .)
-    x %<>% gsub("ajusta.*", " ", .)
-    x %<>% gsub("ajuste.*", " ", .)
-    x %<>% gsub("completar.*", " ", .)
-    x %<>% gsub("receta.*", " ", .)
-    x %<>% gsub("del.*", " ", .)
-    x %<>% gsub("fecha.*", " ", .)
-    x %<>% gsub("hace \\(?[0-9/]+\\)?", " ", .)
-    x %<>% gsub("[0-9]$", "", .)
-    x %<>% gsub("horas\\(?[0-9/]+\\)?", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? min", " ", .)
-    x %<>% gsub("x \\(?[0-9/]+\\)? d", " ", .)
-    x %<>% gsub("por \\(?[0-9/]+\\)? d", " ", .)
-    x %<>% gsub("por \\(?[0-9/]+\\)?.", " ", .)
-    x %<>% gsub("por \\(?[0-9/]+\\)? h", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)?d", " ", .)
-    x %<>% gsub("# \\(?[0-9/]+\\)?", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? d$", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)?:\\(?[0-9/]+\\)?", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? :\\(?[0-9/]+\\)?", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? p.m.", " ", .)
-    x %<>% gsub("m4", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)?p.m.", " ", .)
-    x %<>% gsub("[(]\\(?[0-9/]+\\)?am[)]", " ", .)
-    x %<>% gsub("[(]\\(?[0-9/]+\\)?pm[)]", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? de la tarde", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? cc", " ", .)
-    x %<>% gsub("\\(?[0-9/]+\\)? cucharada", " ", .)
-    x %<>% gsub(" las \\(?[0-9/]+\\)?", " ", .)
-    x %<>% gsub(" el \\(?[0-9/]+\\)?", " ", .)
-    x %<>% gsub("1 vez", " ", ., fixed = T)
-    x %<>% gsub(".y", " y", ., fixed = T)
-    x %<>% gsub("  ", " ", ., fixed = T)
+    x %<>% gsub("tableta", "", ., ignore.case = T) %>%
+           gsub("media veces", " ", ., ignore.case = T) %>%
+           gsub("  ", " ", .) %>%
+           gsub("bid", " 2 veces y ", .) %>%
+           gsub("tid", " 3 veces y ", .) %>%
+           gsub("[.]\\(?[0-9/]+\\)?", "", .) %>%
+           gsub("\\s*\\([^\\)]+\\)", "", .) %>%
+           gsub(" I ", " Y ", .) %>%
+           texto.a.numero() %>%
+           gsub("\\(?[0-9/]+\\)?[/]\\(?[0-9/]+\\)?[/]\\(?[0-9/]+\\)?", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? [/]\\(?[0-9/]+\\)?[/]\\(?[0-9/]+\\)?", " ", .) %>%
+           gsub("[(] \\(?[0-9/]+\\)? [)]", " ", .) %>%
+           gsub("[/]\\(?[0-9/]+\\)?[/]$", " ", .) %>%
+           gsub("[/]\\(?[0-9/]+\\)?[/]", " ", .) %>%
+           gsub("[/]\\(?[0-9/]+\\)?[/][.]$", " ", .) %>%
+           gsub("[/][/].*", " ", .) %>%
+           gsub("[/][*].*", " ", .) %>%
+           gsub("[**].*", " ", .) %>%
+           gsub("[+][+].*", " ", .) %>%
+           gsub("[.][.].*", " ", .) %>%
+           gsub("[-][-].*", " ", .) %>%
+           gsub("[<].*", " ", .) %>%
+           gsub(" [/] ", " ", .) %>%
+           gsub("am,md", " 2 veces y ", .) %>%
+           gsub("am y md", " 2 veces y ", .) %>%
+           gsub("c-\\(?[0-9/]+\\)?", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? mes.*", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)?mes.*", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? semana", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? semanas", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? dias", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? dia", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? noches", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? de la noche", " ", .) %>%
+           gsub("inicia.*", " ", .) %>%
+           gsub("hasta.*", " ", .) %>%
+           gsub("llev.*", " ", .) %>%
+           gsub("retiro.*", " ", .) %>%
+           gsub("pendiente.*", " ", .) %>%
+           gsub("ajusta.*", " ", .) %>%
+           gsub("ajuste.*", " ", .) %>%
+           gsub("completar.*", " ", .) %>%
+           gsub("receta.*", " ", .) %>%
+           gsub("del.*", " ", .) %>%
+           gsub("fecha.*", " ", .) %>%
+           gsub("hace \\(?[0-9/]+\\)?", " ", .) %>%
+           gsub("[0-9]$", "", .) %>%
+           gsub("horas\\(?[0-9/]+\\)?", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? min", " ", .) %>%
+           gsub("x \\(?[0-9/]+\\)? d", " ", .) %>%
+           gsub("por \\(?[0-9/]+\\)? d", " ", .) %>%
+           gsub("por \\(?[0-9/]+\\)?.", " ", .) %>%
+           gsub("por \\(?[0-9/]+\\)? h", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)?d", " ", .) %>%
+           gsub("# \\(?[0-9/]+\\)?", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? d$", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)?:\\(?[0-9/]+\\)?", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? :\\(?[0-9/]+\\)?", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? p.m.", " ", .) %>%
+           gsub("m4", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)?p.m.", " ", .) %>%
+           gsub("[(]\\(?[0-9/]+\\)?am[)]", " ", .) %>%
+           gsub("[(]\\(?[0-9/]+\\)?pm[)]", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? de la tarde", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? cc", " ", .) %>%
+           gsub("\\(?[0-9/]+\\)? cucharada", " ", .) %>%
+           gsub(" las \\(?[0-9/]+\\)?", " ", .) %>%
+           gsub(" el \\(?[0-9/]+\\)?", " ", .) %>%
+           gsub("1 vez", " ", ., fixed = T) %>%
+           gsub(".y", " y", ., fixed = T) %>%
+           gsub("  ", " ", ., fixed = T)
     for(i in 1:length(strsplit(x, split = " y ")[[1]])) {
       y <- unlist(strsplit(x, split = " y "))[i]
       if(y != x & length(grep("caso n", y)) > 0) {
@@ -182,8 +182,8 @@
           aa[v1[!y1]] <- " "
           y <- paste(aa, collapse = "")
         }
-        y %<>% gsub("\\(?[0-9/]+\\)?h ", " ", .)
-        y %<>% gsub("\\(?[0-9/]+\\)?h[)]", " ", .)
+        y %<>% gsub("\\(?[0-9/]+\\)?h ", " ", .) %>%
+               gsub("\\(?[0-9/]+\\)?h[)]", " ", .)
         num <- str_extract_all(y, "\\(?[0-9/]+\\)?")[[1]]
         if(length(grep("/", num)) != 0) {
           num %<>% fraccion.a.numero()
@@ -207,122 +207,164 @@
   # ciertas palabras que no brindan nada de información y solo generan ruido.
   
   limpieza.nombres <- function(x) {
-    x %<>% gsub(" NO.*OTRO", "", .)
-    x %<>% str_replace_all(., "[^[:graph:]]", " ")
-    x %<>% gsub(" NO.*DICA", "", .)
-    x %<>% gsub("NO$", "", .)
-    x %<>% gsub(" NIO", "", .)
-    x %<>% gsub("N I O", "", .)
-    x %<>% gsub("N.I.O", "", .)
-    x %<>% gsub(" NI$", "", .)
-    x %<>% gsub("(NO.*OTRO)", "", .)
-    x %<>% gsub("NOINDIC", "", .)
-    x %<>% gsub("INDEFINIDO", "", .)
-    x %<>% gsub("U.AP", "", .)
-    x %<>% gsub("U.A.P.", "", .)
-    x %<>% gsub("U AP", "", .)
-    x %<>% gsub("DEL SO", "", .)
-    x %<>% gsub("DEL S", "", .)
-    x %<>% gsub("DE LOS S", "", .)
-    x %<>% gsub("DE LA TRIN", "", .)
-    x %<>% gsub("DE LA TRI", "", .)
-    x %<>% gsub("DE LA TR", "", .)
-    x %<>% gsub("DE LA T", "", .)
-    x %<>% gsub("DE LOS ANGE", "", .)
-    x %<>% gsub("DE LOS ANG", "", .)
-    x %<>% gsub("DE LOS AN", "", .)
-    x %<>% gsub("DE LOS A", "", .)
-    x %<>% gsub("DEL LOS ANG", "", .)
-    x %<>% gsub("DE ANGE", "", .)
-    x %<>% gsub("DE SAN G", "", .)
-    x %<>% gsub("DE SAN M", "", .)
-    x %<>% gsub("DE SAN A", "", .)
-    x %<>% gsub("DE SAN B", "", .)
-    x %<>% gsub("DE SAN", "", .)
-    x %<>% gsub("DE SA", "", .)
-    x %<>% gsub("DE GUADA", "", .)
-    x %<>% gsub("DE GUAD", "", .)
-    x %<>% gsub("DE GUA", "", .)
-    x %<>% gsub("DE LAS PIEDA", "", .)
-    x %<>% gsub("DE LAS PIE", "", .)
-    x %<>% gsub("DE LAS P", "", .)
-    x %<>% gsub("DEL PIL ", "", .)
-    x %<>% gsub("DEL PI ", "", .)
-    x %<>% gsub("DE LAS ME", "", .)
-    x %<>% gsub("DE LAS M", "", .)
-    x %<>% gsub("DE LA CAN", "", .)
-    x %<>% gsub("DE LA CO", "", .)
-    x %<>% gsub("DE LA C", "", .)
-    x %<>% gsub("DE CARME", "", .)
-    x %<>% gsub("DEL C", "", .)
-    x %<>% gsub("DEL ROSARIO", "", .)
-    x %<>% gsub("DEL ROSARI", "", .)
-    x %<>% gsub("DEL ROSAR", "", .)
-    x %<>% gsub("DEL ROSA", "", .)
-    x %<>% gsub("DEL ROS", "", .)
-    x %<>% gsub("DEL RO", "", .)
-    x %<>% gsub("DEL R", "", .)
-    x %<>% gsub("DEL ESPI", "", .)
-    x %<>% gsub("DE FATIMA", "", .)
-    x %<>% gsub("DE FAT", "", .)
-    x %<>% gsub("DE F", "", .)
-    x %<>% gsub("DEL GER", "", .)
-    x %<>% gsub("DE GER", "", .)
-    x %<>% gsub("DE GE", "", .)
-    x %<>% gsub("DEL MIL", "", .)
-    x %<>% gsub("DE LOS DOLOR", "", .)
-    x %<>% gsub("DE LOS DO", "", .)
-    x %<>% gsub("DE LOS DESA", "", .)
-    x %<>% gsub("DE LOS SANTOS", "", .)
-    x %<>% gsub("DE JE", "", .)
-    x %<>% gsub("DE J", "", .)
-    x %<>% gsub("DE PIEDA", "", .)
-    x %<>% gsub("DE P", "", .)
-    x %<>% gsub("DEL N", "", .)
-    x %<>% gsub("DEL AUX", "", .)
-    x %<>% gsub("DEL BUSTO", "", .)
-    x %<>% gsub("DE LOS", "", .)
-    x %<>% gsub("DE LAS", "", .)
-    x %<>% gsub(" DEL$", "", .)
-    x %<>% gsub(" DE LO$", "", .)
-    x %<>% gsub("DE LA O", "DELAO", .)
-    x %<>% gsub("DE L", "", .)
-    x %<>% gsub(" D$", "", .)
-    x %<>% gsub(" RA$", "", .)
-    x %<>% gsub(" A$", "", .)
-    x %<>% gsub(" R$", "", .)
-    x %<>% gsub(" MI$", "", .)
-    x %<>% gsub(" C$", "", .)
-    x %<>% gsub(" AN$", "", .)
-    x %<>% gsub(" G$", "", .)
-    x %<>% gsub(" B$", "", .)
-    x %<>% gsub(" DE S$", "", .)
-    x %<>% gsub(" DEL M$", "", .)
-    x %<>% gsub(" DE M$", "", .)
-    x %<>% gsub(" DE DO$", "", .)
-    x %<>% gsub(" AR$", "", .)
-    x %<>% gsub(" DEL PI$", "", .)
-    x %<>% gsub(" DE CL$", "", .)
-    x %<>% gsub(" DE CL ", " ", .)
-    x %<>% gsub(" O ", " ", .)
-    x %<>% gsub(" AR ", " ", .)
-    x %<>% gsub(" DE DO ", " ", .)
-    x %<>% gsub(" DEL M ", " ", .)
-    x %<>% gsub(" DE M ", " ", .)
-    x %<>% gsub(" DE S ", " ", .)
-    x %<>% gsub(" B ", " ", .)
-    x %<>% gsub(" G ", " ", .)
-    x %<>% gsub(" AN ", " ", .)
-    x %<>% gsub(" C ", " ", .)
-    x %<>% gsub(" RA ", " ", .)
-    x %<>% gsub(" A ", " ", .)
-    x %<>% gsub(" D ", " ", .)
-    x %<>% gsub(" R ", " ", .)
-    x %<>% gsub(" MI ", " ", .)
-    x %<>% gsub("^A ", "", .)
-    x %<>% gsub("DELAO", "DE LA O", .)
-    x %<>% gsub("\\s+$", "", .)
-    x %<>% gsub("  ", " ", .)
+    x %<>% gsub(" NO.*OTRO", "", .) %>%
+           str_replace_all(., "[^[:graph:]]", " ") %>%
+           gsub(" NO.*DICA", "", .) %>%
+           gsub("NO$", "", .) %>%
+           gsub(" NIO", "", .) %>%
+           gsub("N I O", "", .) %>%
+           gsub("N.I.O", "", .) %>%
+           gsub(" NI$", "", .) %>%
+           gsub("(NO.*OTRO)", "", .) %>%
+           gsub("NOINDIC", "", .) %>%
+           gsub("INDEFINIDO", "", .) %>%
+           gsub("U.AP", "", .) %>%
+           gsub("U.A.P.", "", .) %>%
+           gsub("U AP", "", .) %>%
+           gsub("DEL SO", "", .) %>%
+           gsub("DEL S", "", .) %>%
+           gsub("DE LOS S", "", .) %>%
+           gsub("DE LA TRIN", "", .) %>%
+           gsub("DE LA TRI", "", .) %>%
+           gsub("DE LA TR", "", .) %>%
+           gsub("DE LA T", "", .) %>%
+           gsub("DE LOS ANGE", "", .) %>%
+           gsub("DE LOS ANG", "", .) %>%
+           gsub("DE LOS AN", "", .) %>%
+           gsub("DE LOS A", "", .) %>%
+           gsub("DEL LOS ANG", "", .) %>%
+           gsub("DE ANGE", "", .) %>%
+           gsub("DE SAN G", "", .) %>%
+           gsub("DE SAN M", "", .) %>%
+           gsub("DE SAN A", "", .) %>%
+           gsub("DE SAN B", "", .) %>%
+           gsub("DE SAN", "", .) %>%
+           gsub("DE SA", "", .) %>%
+           gsub("DE GUADA", "", .) %>%
+           gsub("DE GUAD", "", .) %>%
+           gsub("DE GUA", "", .) %>%
+           gsub("DE LAS PIEDA", "", .) %>%
+           gsub("DE LAS PIE", "", .) %>%
+           gsub("DE LAS P", "", .) %>%
+           gsub("DEL PIL ", "", .) %>%
+           gsub("DEL PI ", "", .) %>%
+           gsub("DE LAS ME", "", .) %>%
+           gsub("DE LAS M", "", .) %>%
+           gsub("DE LA CAN", "", .) %>%
+           gsub("DE LA CO", "", .) %>%
+           gsub("DE LA C", "", .) %>%
+           gsub("DE CARME", "", .) %>%
+           gsub("DEL C", "", .) %>%
+           gsub("DEL ROSARIO", "", .) %>%
+           gsub("DEL ROSARI", "", .) %>%
+           gsub("DEL ROSAR", "", .) %>%
+           gsub("DEL ROSA", "", .) %>%
+           gsub("DEL ROS", "", .) %>%
+           gsub("DEL RO", "", .) %>%
+           gsub("DEL R", "", .) %>%
+           gsub("DEL ESPI", "", .) %>%
+           gsub("DE FATIMA", "", .) %>%
+           gsub("DE FAT", "", .) %>%
+           gsub("DE F", "", .) %>%
+           gsub("DEL GER", "", .) %>%
+           gsub("DE GER", "", .) %>%
+           gsub("DE GE", "", .) %>%
+           gsub("DEL MIL", "", .) %>%
+           gsub("DE LOS DOLOR", "", .) %>%
+           gsub("DE LOS DO", "", .) %>%
+           gsub("DE LOS DESA", "", .) %>%
+           gsub("DE LOS SANTOS", "", .) %>%
+           gsub("DE JE", "", .) %>%
+           gsub("DE J", "", .) %>%
+           gsub("DE PIEDA", "", .) %>%
+           gsub("DE P", "", .) %>%
+           gsub("DEL N", "", .) %>%
+           gsub("DEL AUX", "", .) %>%
+           gsub("DEL BUSTO", "", .) %>%
+           gsub("DE LOS", "", .) %>%
+           gsub("DE LAS", "", .) %>%
+           gsub(" DEL$", "", .) %>%
+           gsub(" DE LO$", "", .) %>%
+           gsub("DE LA O", "DELAO", .) %>%
+           gsub("DE L", "", .) %>%
+           gsub(" D$", "", .) %>%
+           gsub(" RA$", "", .) %>%
+           gsub(" A$", "", .) %>%
+           gsub(" R$", "", .) %>%
+           gsub(" MI$", "", .) %>%
+           gsub(" C$", "", .) %>%
+           gsub(" AN$", "", .) %>%
+           gsub(" G$", "", .) %>%
+           gsub(" B$", "", .) %>%
+           gsub(" DE S$", "", .) %>%
+           gsub(" DEL M$", "", .) %>%
+           gsub(" DE M$", "", .) %>%
+           gsub(" DE DO$", "", .) %>%
+           gsub(" AR$", "", .) %>%
+           gsub(" DEL PI$", "", .) %>%
+           gsub(" DE CL$", "", .) %>%
+           gsub(" DE CL ", " ", .) %>%
+           gsub(" O ", " ", .) %>%
+           gsub(" AR ", " ", .) %>%
+           gsub(" DE DO ", " ", .) %>%
+           gsub(" DEL M ", " ", .) %>%
+           gsub(" DE M ", " ", .) %>%
+           gsub(" DE S ", " ", .) %>%
+           gsub(" B ", " ", .) %>%
+           gsub(" G ", " ", .) %>%
+           gsub(" AN ", " ", .) %>%
+           gsub(" C ", " ", .) %>%
+           gsub(" RA ", " ", .) %>%
+           gsub(" A ", " ", .) %>%
+           gsub(" D ", " ", .) %>%
+           gsub(" R ", " ", .) %>%
+           gsub(" MI ", " ", .) %>%
+           gsub("^A ", "", .) %>%
+           gsub("DELAO", "DE LA O", .) %>%
+           gsub("\\s+$", "", .) %>%
+           gsub("  ", " ", .)
+    return(x)
+  }
+  
+  # Esta función sirve para limpiar las especialidades médicas:
+  
+  limpiar.especialidad <- function(x) {
+    x %<>% gsub("MEDICINA", "", .) %>%
+           gsub("FONIATRIAA", "AUDIOLOGIA", .) %>%
+           gsub("PSIQUIAT$", "PSIQUIATRIA", .) %>%
+           gsub("NEUROLOG$", "NEUROLOGIA", .) %>%
+           gsub("PSICOSOMAT$", "PSICOSOMATICA", .) %>%
+           gsub("PSICOSOMATI$", "PSICOSOMATICA", .) %>%
+           gsub("INFECTOLOGI$", "INFECTOLOGIA", .) %>%
+           gsub("GASTROENTER$", "GASTROENTEROLOGIA", .) %>%
+           gsub("NEUROCARDI$", "NEUROCARDIO", .) %>%
+           gsub("GERIATRI$", "GERIATRIA", .) %>%
+           gsub("CARDIOLO$", "CARDIOLOGIA", .) %>%
+           gsub("REHABILITAC$", "REHABILITACION", .) %>%
+           gsub("REUMATOLOGI$", "REUMATOLOGIA", .) %>%
+           gsub("DERMATOLOGI$", "DERMATOLOGIA", .) %>%
+           gsub("ENDOCRINOLO$", "ENDOCRINOLOGIA", .) %>%
+           gsub("ADOLESCENTE$", "ADOLESCENTES", .) %>%
+           gsub("EMERGENC$", "EMERGENCIA", .) %>%
+           gsub("FA$", "FAMILIAR", .) %>%
+           gsub("UCI MEDICOS", "", .) %>%
+           gsub("UCI", "", .) %>%
+           gsub("PENSION", "", .) %>%
+           gsub("(PSIQUIATRIA).*", "\\1", .) %>%
+           gsub("(PEDIATRIA).*", "\\1", .) %>%
+           gsub("(PSICOLOGIA).*", "\\1", .) %>%
+           gsub("(CIRUGIA).*", "\\1", .) %>%
+           gsub("(ODONTOLOGIA).*", "\\1", .) %>%
+           gsub("(RADIOLOGIA).*", "\\1", .) %>%
+           gsub("(GINECO).*", "\\1", .) %>%
+           gsub("(ONCOLOGIA).*", "\\1", .) %>%
+           gsub("(NUTRICION).*", "\\1", .) %>%
+           gsub("(NEUROCARDIO).*", "\\1", .) %>%
+           gsub("(FAMILIAR).*", "\\1", .) %>%
+           gsub("(CLINICA).*", "\\1", .) %>%
+           gsub("(AUDIOLOGIA).*", "\\1", .) %>%
+           gsub("NO APLICA", "", .) %>%
+           gsub("^\\s+", "", .)
     return(x)
   }
   
