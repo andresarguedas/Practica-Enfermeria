@@ -157,6 +157,7 @@ serie.tiempo <- ggplot(data = clon.tiempo, aes(x = tiempo, y = x)) +
   ylab("Cantidad de prescripciones") + 
   xlab("Año") + 
   theme1 +
+  scale_x_date(date_breaks = "1 year", labels = date_format("%Y")) +
   ggtitle(paste("Figura ", i, ":\nCantidad de prescripciones de clonazepam por mes y año,\n en Costa Rica, entre el 2011 y el 2015", sep = ""))
 
 g5 <- arrangeGrob(serie.tiempo, bottom = textGrob(fuente1, x = 0, hjust = -0.1, vjust = -0.1, gp = gpar(fontsize = 10)))
