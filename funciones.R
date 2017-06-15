@@ -120,6 +120,7 @@
            gsub("ajusta.*", " ", .) %>%
            gsub("ajuste.*", " ", .) %>%
            gsub("completar.*", " ", .) %>%
+           gsub("se despacha.*", " ", .) %>%
            gsub("receta.*", " ", .) %>%
            gsub("del.*", " ", .) %>%
            gsub("fecha.*", " ", .) %>%
@@ -364,7 +365,7 @@
            gsub("(CLINICA).*", "\\1", .) %>%
            gsub("(AUDIOLOGIA).*", "\\1", .) %>%
            gsub("NO APLICA", "", .) %>%
-           gsub("^\\s+", "", .)
+           gsub("^\\s+|\\s+$", "", .)
     return(x)
   }
   
