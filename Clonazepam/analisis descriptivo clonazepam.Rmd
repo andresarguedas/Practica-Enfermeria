@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = FALSE)
 x <- c("ggplot2", "scales", "gridExtra", "grid", "magrittr", "plyr", "cowplot", "lubridate", "knitr")
 sapply(x, library, character.only = T)
 remove(x)
-source(paste(getwd(), "/funciones.R", sep = ""))
+source("F:/Proyecto enfermeria/Practica-Enfermeria/Funciones.R")
 clon <- readRDS(file = paste(getwd(), "/data/clonazepam.rds", sep = ""))
 clon$edad.rec <- cut(clon$edad, breaks = c(-Inf, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, Inf), labels = c("0 a 10", "11 a 15", "16 a 20", "21 a 25", "26 a 30", "31 a 35", "36 a 40", "41 a 45", "46 a 50", "51 a 55", "56 a 60", "61 a 65", "66 a 70", "71 a 75", "76 a 80", "81 a 85", "86 a 90", "Más de 91"))
 clon.na <- na.omit(clon)
@@ -168,6 +168,23 @@ grid.draw(g5)
 ```
 
   Al ver la cantidad de prescripciones por mes y año, presentadas en la Figura `r i`, hay una tendencia creciente en la cantidad de prescripciones a lo largo del tiempo. Cabe resaltar el pico presente hacia finales del 2011, que parece ser el valor más raro de toda la serie temporal. Además, hay aumentos pronunciados a mediados del 2013 y a lo largo del 2014, pero, durante el 2015, parece que el crecimiento se ha estabilizado un poco.
+  
+  
+```{r Prescripciones por año}
+i <- i + 1
+
+p.año <- ggplot(data = clon.tiempo, aes(x = Año, y = x)) + 
+  geom_col(fill = "brown") + 
+  ylab("Cantidad de prescripciones") +
+  theme1 +
+  ggtitle(paste("Figura ", i, ":\nCantidad de prescripciones de clonazepam por año,\n en Costa Rica, entre el 2011 y el 2015", sep = ""))
+
+g10 <- arrangeGrob(p.año, bottom = textGrob(fuente1, x = 0, hjust = -0.1, vjust = -0.1, gp = gpar(fontsize = 10)))
+
+grid.draw(g10)
+```
+
+  Como se puede notar de la Figura `r i`, la cantidad de prescripciones de clonazepam ha ido aumentando conforme pasan los años, lo que concuerda con lo observado en la Figura `r i - 1`. De igual forma, se puede ver que la cantidad de prescripciones se ha cuadruplicado desde el 2011 al 2015, es decir, un período de 5 años.
 
 #Pacientes y prescripciones mayores a la DDD
 

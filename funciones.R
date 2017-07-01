@@ -2,7 +2,8 @@
   
   # Mediante esto cargamos las libraries requeridas para las funciones.
   
-  x <- c("stringr", "taRifx", "magrittr", "stringdist", "doParallel")
+  x <- c("stringr", "taRifx", "magrittr", "stringdist", "doParallel", 
+         "lubridate")
   lapply(x, require, character.only = T)
   remove(x)
   
@@ -459,6 +460,67 @@
     }
     stopImplicitCluster()
     return(ID)
+  }
+  
+  # Esta función calculca la dosis y la frecuencia y hace alguna limpieza de los
+  # datos. 
+  
+  extraccion <- function(x, medicamento) {
+    colnames(x)[1] <- "Identificacion"
+    options(scipen = 999)
+    x$Identificacion %<>% as.numeric()
+    x$Nombre %<>% as.character()
+    x$Fecha %<>% dmy()
+    x$Ano <- year(x$Fecha) 
+    x$Mes <- month(x$Fecha)
+    x$Dia <- day(x$Fecha)
+    x$Medico %<>% as.character()
+    x$Especialidad %<>% as.character()
+    x$Indicacion %<>% as.character()
+    x$Especialidad %<>% limpiar.especialidad()
+    x$ID <- asignar.ID(x$Identificacion, x$Nombre)
+    x$Identificacion <- NULL
+    x$Nombre <- NULL
+    registerDoParallel(cores = 8)
+    K <- ncol(x)
+    x[, (K + 1):(K + 2)] <- foreach::foreach(i = 1:nrow(x), .combine = rbind, .packages = c("stringr", "taRifx", "magrittr"), .export = c("extraer.numeros", "texto.a.numero", "fraccion.a.numero")) %dopar% {
+      extraer.numeros(x$Indicacion[i])
+    }
+    stopImplicitCluster()
+    colnames(x)[(K + 1):(K + 2)] <- c("Dosis", "Frecuencia")
+    remove(K)
+    return(x)
+  }
+  
+  correccion <- function(x, medicamento) {
+    ceros <- which(x$dosis == 0 | x$frecuencia == 0)
+    if(length(ceros > 0)) {
+      x[ceros, c(11, 17, 18)] %<>% edit()
+    }
+    remove(ceros)
+    nas <- which(is.na(x))
+    if(length(nas > 0)) {
+      x[nas, c(11, 17, 18)] %<>% edit()
+    }
+    remove(nas)
+    nas.e <- which(x$Dosis > 999)
+    if(length(nas.e > 0)) {
+      x[nas.e, c(11, 17, 18)] %<>% edit()
+    }
+    remove(nas.e)
+    f.frac <- which(x$Frecuencia %% 1 != 0)
+    if(length(f.frac > 0)) {
+      x[f.frac, c(11, 17, 18)] %<>% edit()
+    }
+    remove(f.frac)
+    x$mg <- x$Dosis * 10
+    h <- hat(cbind(x$mg, x$Frecuencia))
+    v.extremos <- which(h > 10 * mean(h))
+    if(length(v.extremos > 0)) {
+      x[v.extremos, c(11, 17, 18)] %<>% edit()
+    }
+    remove(h, v.extremos)
+    return(x)
   }
   
 ##FIN##=========================================================================
