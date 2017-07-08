@@ -2,10 +2,10 @@
   
   # Mediante esto cargamos las libraries requeridas para las funciones.
   
-  x <- c("stringr", "taRifx", "magrittr", "stringdist", "doParallel", 
-         "lubridate")
-  lapply(x, require, character.only = T)
-  remove(x)
+  libraries <- c("stringr", "taRifx", "magrittr", "stringdist", "doParallel", 
+         "lubridate", "ggplot2", "cowplot", "gridExtra", "grid", "scales")
+  lapply(libraries, require, character.only = T)
+  remove(libraries)
   
   # Esta función identifica las fracciones en un vector de caracteres (en la 
   # forma numero/numero) y las transforma en un número:
@@ -462,7 +462,7 @@
     return(ID)
   }
   
-  # Esta función calculca la dosis y la frecuencia y hace alguna limpieza de los
+  # Esta función calcula la dosis y la frecuencia y hace alguna limpieza de los
   # datos. 
   
   extraccion <- function(x, medicamento) {
@@ -483,7 +483,12 @@
     x$Nombre <- NULL
     registerDoParallel(cores = 8)
     K <- ncol(x)
-    x[, (K + 1):(K + 2)] <- foreach::foreach(i = 1:nrow(x), .combine = rbind, .packages = c("stringr", "taRifx", "magrittr"), .export = c("extraer.numeros", "texto.a.numero", "fraccion.a.numero")) %dopar% {
+    x[, (K + 1):(K + 2)] <- foreach::foreach(i = 1:nrow(x), .combine = rbind, 
+                                             .packages = c("stringr", "taRifx", 
+                                                           "magrittr"), 
+                                             .export = c("extraer.numeros", 
+                                                         "texto.a.numero", 
+                                                         "fraccion.a.numero")) %dopar% {
       extraer.numeros(x$Indicacion[i])
     }
     stopImplicitCluster()
@@ -513,7 +518,9 @@
       x[f.frac, c(11, 17, 18)] %<>% edit()
     }
     remove(f.frac)
-    x$mg <- x$Dosis * 10
+    x$mg <- x$Dosis * as.numeric(unlist(regmatches(x$Descripcion,
+                                                   gregexpr("[[:digit:]]+\\.*[[:digit:]]*", 
+                                                            x$Descripcion))))
     h <- hat(cbind(x$mg, x$Frecuencia))
     v.extremos <- which(h > 10 * mean(h))
     if(length(v.extremos > 0)) {
@@ -521,6 +528,286 @@
     }
     remove(h, v.extremos)
     return(x)
+  }
+  
+  # Esta función crea todos los gráficos necesarios con su respectivo título y
+  # fuente y los guarda en una carpeta:
+  
+  graficos <- function(x, medicamento, DDD) {
+    m.validos <- c("clobazam", "clonazepam", "diazepan", "fenobarbital", 
+                   "lorazepan", "midazolan", "tiopental")
+    me <- tolower(medicamento)
+    if(!me %in% m.validos) {
+      stop(paste(me, " no es un medicamento válido.", sep = ""))
+    }
+    ME <- paste(toupper(substr(me, 1, 1)), substr(me, 2, nchar(me)), sep = "")
+    dir.create(paste(getwd(), "/", ME, "/plots", sep = ""))
+    x$edad.rec <- cut(x$Edad, breaks = c(-Inf, 10, 15, 20, 25, 30, 35, 40, 45, 
+                                         50, 55, 60, 65, 70, 75, 80, 85, 90, 
+                                         Inf), 
+                      labels = c("0 a 10", "11 a 15", "16 a 20", "21 a 25", 
+                                 "26 a 30", "31 a 35", "36 a 40", "41 a 45", 
+                                 "46 a 50", "51 a 55", "56 a 60", "61 a 65", 
+                                 "66 a 70", "71 a 75", "76 a 80", "81 a 85", 
+                                 "86 a 90", "Más de 91"))
+    x.na <- na.omit(x)
+    theme1 <- theme(axis.text.x = element_text(size = 11 * 0.8), 
+                    axis.text.y = element_text(size = 11 * 0.8), 
+                    axis.title.x = element_text(size = 11), 
+                    axis.title.y = element_text(size = 11), 
+                    plot.title = element_text(size = 14, face = "bold", 
+                                              hjust = 0.5))
+    fuente1 <- "Fuente: Datos de consumo de psicotrópicos de la CCSS del 2011 al 2015"
+    i <- 0
+    mujeres <- sum(x.na$Sexo == 'F') / nrow(x.na)
+    hombres <- sum(x.na$Sexo == 'M') / nrow(x.na)
+    df1 <- data.frame(
+      sexo = c("Hombres", "Mujeres"),
+      porcentaje = c(hombres, mujeres)
+    )
+    bp <- ggplot(df1, aes(x = "", y = porcentaje, fill = sexo)) + 
+          geom_bar(width = 1, stat = "identity")
+    pie <- bp + coord_polar("y", start = 0)
+    blank_theme <- theme_minimal()+
+      theme(
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.border = element_blank(),
+        panel.grid = element_blank(),
+        axis.ticks = element_blank(),
+        plot.title = element_text(size = 14, face = "bold")
+      )
+    i <- i + 1
+    pie <- pie + 
+           scale_fill_manual(values = c("brown2", "blue3"), name = "Sexo") +  
+           blank_theme +
+           theme(axis.text.x = element_blank(), 
+                 plot.title = element_text(hjust = 0.5)) +
+           geom_text(aes(y = c(cumsum(porcentaje)[-length(porcentaje)] + .5,
+                               cumsum(porcentaje)[-length(porcentaje)]), 
+                    label = percent(porcentaje)), size = 5) + 
+           ggtitle(paste("Figura ", i, 
+                         ":\nPorcentaje del total de prescripciones de ", me, " por sexo,\n en Costa Rica, entre el 2011 y el 2015", 
+                         sep = ""))
+    g1 <- arrangeGrob(pie, bottom = textGrob(fuente1, x = 0, hjust = -0.1, 
+                                             vjust = -0.1, 
+                                             gp = gpar(fontsize = 10)))
+    ggsave(filename = paste(getwd(), "/", ME, "/plots", "/1 Pastel.png", 
+                            sep = ""),
+              g1)
+    x.na$Sexo %<>% as.numeric()
+    x.paciente <- aggregate(x = x.na[, c(1, 2, 19)], by = list(ID = x.na$ID), 
+                            FUN = function(x) c(m = min(x), l = length(x), 
+                                                sum(x > DDD)))
+    x.na$Sexo %<>% factor()
+    x.paciente$Sexo <- x.paciente$Sexo[, 1]
+    x.paciente$Prescripciones <- x.paciente$Edad[, 2]
+    x.paciente$Edad <- x.paciente$Edad[, 1]
+    x.paciente$mg <- x.paciente$mg[, 3]
+    x.paciente$edad.rec <- cut(x.paciente$Edad, breaks = c(-Inf, 10, 15, 20, 25,
+                                                           30, 35, 40, 45, 50, 
+                                                           55, 60, 65, 70, 75,
+                                                           80, 85, 90, Inf), 
+                               labels = c("0 a 10", "11 a 15", "16 a 20", 
+                                          "21 a 25", "26 a 30", "31 a 35", 
+                                          "36 a 40", "41 a 45", "46 a 50", 
+                                          "51 a 55", "56 a 60", "61 a 65", 
+                                          "66 a 70", "71 a 75", "76 a 80", 
+                                          "81 a 85", "86 a 90", "Más de 91"))
+    x.ddd <- subset(x.paciente, mg >= 1)
+    x.edad <- aggregate(x.na$mg, by = list(Edad = x.na$edad.rec),
+                        FUN = function(x) c(length(x), mean(x), sum(x > DDD)))
+    x.edad$promedio <- x.edad$x[, 2]
+    x.edad$ddd <- x.edad$x[, 3]
+    x.edad$x <- x.edad$x[, 1]
+    x.edad$ddd.p <- x.edad$ddd / x.edad$x * 100
+    i <- i + 1
+    barras <- ggplot(data = x.edad, aes(x = Edad, y = x)) + 
+      geom_col(fill = "brown") + 
+      ylab("Prescripciones") +
+      ggtitle(paste("Figura ", i, 
+                    ":\nCantidad de prescripciones de ", me, " por grupos\n de edad, en Costa Rica, entre el 2011 y el 2015", 
+                    sep = "")) +
+      theme1 +
+      theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
+    g2 <- arrangeGrob(barras, bottom = textGrob(fuente1, x = 0, hjust = -0.1, 
+                                                vjust = -0.1, 
+                                                gp = gpar(fontsize = 10)))
+    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+                            "/2 Histograma prescripciones.png", 
+                            sep = ""),
+           g2)
+    x.sexoedad <- aggregate(x = x.na, by = list(Edad = x.na$edad.rec, 
+                                                Sexo = x.na$Sexo), 
+                            FUN = length)[, c(1, 2, 18)]
+    x.sexoedad$ID <- ifelse(x.sexoedad$Sexo == '1', 
+                            x.sexoedad$ID / length(which(x.na$Sexo == '1')) * 100, 
+                            x.sexoedad$ID / length(which(x.na$Sexo == '2')) * 100)
+    x.sexoedad$ID <- ifelse(x.sexoedad$Sexo == '1', 
+                            -1 * x.sexoedad$ID, 
+                            x.sexoedad$ID)
+    colnames(x.sexoedad)[3] <- "Prescripciones"
+    i <- i + 1
+    m1 <- ceiling(max(abs(x.sexoedad$Prescripciones)) / 2.5) * 2.5
+    m2 <- floor(m1 / 5) * 5
+    piramide <- ggplot(data = x.sexoedad, aes(x = Edad, y = Prescripciones, 
+                                       fill = factor(Sexo))) + 
+      geom_bar(data = subset(x.sexoedad, Sexo == '1'), stat = "identity") +
+      geom_bar(data = subset(x.sexoedad, Sexo == '2'), stat = "identity") +
+      coord_flip() +
+      theme1 +
+      theme(panel.grid.minor.y = element_blank(),
+            panel.grid.major.y = element_blank()) +
+      scale_fill_manual(values = c("brown2", "blue3"), 
+                        labels = c("Hombres", "Mujeres"),
+                        name = "Sexo") +
+      scale_y_continuous(limits = c(-m1, m1), breaks = seq(-m2, m2, 5), 
+                         labels = as.character(abs(seq(-m2, m2, 5)))) +
+      xlab("Edad") +
+      ylab("Porcentaje") +
+      ggtitle(paste("Figura ", i, 
+                    ":\nPorcentaje del total de prescripciones de ", me, " por grupos\n de edad y sexo, en Costa Rica, entre el 2011 y el 2015", 
+                    sep = ""))
+    g3 <- arrangeGrob(piramide, bottom = textGrob(fuente1, x = 0, hjust = -0.1, 
+                                                  vjust = -0.1, 
+                                                  gp = gpar(fontsize = 10)))
+    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+                            "/3 Piramide.png", 
+                            sep = ""),
+           g3)
+    i <- i + 1
+    media.edad <- ggplot(data = x.edad, aes(x = Edad, y = promedio, group = 1)) + 
+      geom_point(size = 2.5) + 
+      geom_line() + 
+      ylab("Dosis promedio (en mg)") +
+      ggtitle(paste("Figura ", i, 
+                    ":\nDosis diaria promedio de ", me, ", en miligramos, por grupos de edad,\n en Costa Rica, entre el 2011 y el 2015", 
+                    sep = "")) +
+      theme1 +
+      theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
+    g4 <- arrangeGrob(media.edad, bottom = textGrob(fuente1, x = 0, 
+                                                    hjust = -0.1, vjust = -0.1, 
+                                                    gp = gpar(fontsize = 10)))
+    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+                            "/4 Dosis promedio.png", 
+                            sep = ""),
+           g4)
+    x.tiempo <- aggregate(x = x.na[, 1], by = list(Mes = x.na$Mes, 
+                                                   Ano = x.na$Ano), FUN = length)
+    x.tiempo$tiempo <- ymd(paste(x.tiempo$Ano, x.tiempo$Mes, 1))
+    i <- i + 1
+    serie.tiempo <- ggplot(data = x.tiempo, aes(x = tiempo, y = x)) + 
+      geom_line() + 
+      ylab("Cantidad de prescripciones") + 
+      xlab("Año") + 
+      theme1 +
+      scale_x_date(date_breaks = "1 year", labels = date_format("%Y")) +
+      ggtitle(paste("Figura ", i, 
+                    ":\nCantidad de prescripciones de ", me, " por mes y año,\n en Costa Rica, entre el 2011 y el 2015", 
+                    sep = ""))
+    
+    g5 <- arrangeGrob(serie.tiempo, bottom = textGrob(fuente1, x = 0, 
+                                                      hjust = -0.1, 
+                                                      vjust = -0.1, 
+                                                      gp = gpar(fontsize = 10)))
+    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+                            "/5 Serie de tiempo.png", 
+                            sep = ""),
+           g5)
+    i <- i + 1
+    p.ano <- ggplot(data = x.tiempo, aes(x = Ano, y = x)) + 
+      geom_col(fill = "brown") + 
+      ylab("Cantidad de prescripciones") +
+      theme1 +
+      ggtitle(paste("Figura ", i, 
+                    ":\nCantidad de prescripciones de ", me, " por año,\n en Costa Rica, entre el 2011 y el 2015", 
+                    sep = ""))
+    g6 <- arrangeGrob(p.ano, bottom = textGrob(fuente1, x = 0, hjust = -0.1, 
+                                                vjust = -0.1, 
+                                                gp = gpar(fontsize = 10)))
+    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+                            "/6 Prescripciones anuales.png", 
+                            sep = ""),
+           g6)
+    i <- i + 1
+    barras.ddd <- ggplot(data = x.ddd, aes(x = edad.rec, y = mg)) +
+      geom_col(fill = "brown") + 
+      ylab("Prescripciones") +
+      xlab("Edad") +
+      ggtitle(paste("Figura ", i, 
+                    ":\nCantidad de prescripciones de ", me, " por encima de la DDD\n por grupos de edad, en Costa Rica, entre el 2011 y el 2015", 
+                    sep = "")) +
+      theme1 +
+      theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
+    g7 <- arrangeGrob(barras.ddd, bottom = textGrob(fuente1, x = 0, 
+                                                    hjust = -0.1, vjust = -0.1, 
+                                                    gp = gpar(fontsize = 10)))
+    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+                            "/7 DDD por edad.png", 
+                            sep = ""),
+           g7)
+    i <- i + 1
+    dispersion <- ggplot(data = x.ddd, aes(x = x.ddd$mg, y = x.ddd$Prescripciones)) +
+      geom_point() +
+      geom_jitter() +
+      geom_abline(slope = 1, intercept = 0, colour = 2) +
+      theme1 +
+      xlab("Cantidad de prescripciones mayores a la DDD") +
+      ylab("Cantidad de prescripciones") +
+      ggtitle(paste("Figura ", i, 
+                    ":\nCantidad de prescripciones totales y mayores a la DDD de ", me, "\n por paciente, en Costa Rica, entre el 2011 y el 2015\n(La línea roja representa que la totalidad de \nprescripciones son mayores a la DDD)", 
+                    sep = ""))
+    g8 <- arrangeGrob(dispersion, bottom = textGrob(fuente1, x = 0, 
+                                                    hjust = -0.1, vjust = -0.1, 
+                                                    gp = gpar(fontsize = 10)))
+    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+                            "/8 Dispersion DDD.png", 
+                            sep = ""),
+           g8)
+    x.medico <- aggregate(x = x.na$mg, by = list(Medico = x.na$Medico), FUN = function(x) c(length(x), sum(x > DDD)))
+    x.medico$ddd <- x.medico$x[, 2]
+    x.medico$x <- x.medico$x[, 1]
+    u1 <- unique(x.medico$x)
+    u1 <- u1[order(u1)]
+    v1 <- matrix(nrow = length(u1), ncol = 2)
+    for(l in 1:length(u1)) {
+      v1[l, 1] <- sum(x.medico$x >= u1[l]) / nrow(x.medico) * 100
+      v1[l, 2] <- sum(x.medico$x[x.medico$x >= u1[l]]) / nrow(x.na) * 100
+    }
+    v1 %<>% as.data.frame()
+    i <- i + 1
+    medicos.por <- ggplot(data = v1, aes(x = V1, y = V2)) + 
+      geom_line() +
+      xlab("Porcentaje de médicos") +
+      ylab("Porcentaje de prescripciones emitidas") +
+      theme1 +
+      ggtitle(paste("Figura ", i, 
+                    ":\nPorcentaje de prescripciones de ", me, " emitidas por un cierto\n porcentaje de médicos, en Costa Rica, entre el 2011 y el 2015", 
+                    sep = ""))
+    g9 <- arrangeGrob(medicos.por, bottom = textGrob(fuente1, x = 0, hjust = -0.1, vjust = -0.1, gp = gpar(fontsize = 10)))
+    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+                            "/9 Medicos DDD.png", 
+                            sep = ""),
+           g9)
+    i <- i + 1
+    dispersion.m <- ggplot(data = x.medico, aes(x = x.medico$ddd, y = x.medico$x)) +
+      geom_point() +
+      geom_jitter() +
+      theme1 +
+      xlab("Cantidad de prescripciones mayores a la DDD") +
+      ylab("Cantidad de prescripciones") +
+      geom_abline(slope = 1, intercept = 0, colour = 2) +
+      ggtitle(paste("Figura ", i, 
+                    ":\nCantidad de prescripciones total y mayores a la DDD recetadas\n según médico, en Costa Rica, entre el 2011 y el 2017\n(La línea roja representa que la totalidad de \nprescripciones son mayores a la DDD)", 
+                    sep = ""))
+    g10 <- arrangeGrob(dispersion.m, bottom = textGrob(fuente1, x = 0, 
+                                                       hjust = -0.1, 
+                                                       vjust = -0.1, 
+                                                       gp = gpar(fontsize = 10)))
+    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+                            "/10 Dispersion medicos.png", 
+                            sep = ""),
+           g10)
   }
   
 ##FIN##=========================================================================

@@ -1,11 +1,11 @@
 ---
-title: "AnÃ¡lisis descriptivo clonazepam"
-author: "AndrÃ©s E. Arguedas L."
+title: "AnÃƒÂ¡lisis descriptivo clonazepam"
+author: "AndrÃƒÂ©s E. Arguedas L."
 date: ''
 output:
-  word_document: default
-  pdf_document: default
   html_document: default
+  pdf_document: default
+  word_document: default
 number_sections: yes
 ---
 
@@ -244,8 +244,8 @@ u1 <- u1[order(u1)]
 v1 <- matrix(nrow = length(u1), ncol = 2)
 
 for(l in 1:length(u1)) {
-  v1[l, 1] <- sum(clon.medico$x > u1[l]) / nrow(clon.medico) * 100
-  v1[l, 2] <- sum(clon.medico$x[clon.medico$x > u1[l]]) / nrow(clon.na) * 100
+  v1[l, 1] <- sum(clon.medico$x >= u1[l]) / nrow(clon.medico) * 100
+  v1[l, 2] <- sum(clon.medico$x[clon.medico$x >= u1[l]]) / nrow(clon.na) * 100
 }
 
 v1 %<>% as.data.frame()
