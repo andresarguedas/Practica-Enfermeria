@@ -541,7 +541,9 @@
       stop(paste(me, " no es un medicamento válido.", sep = ""))
     }
     ME <- paste(toupper(substr(me, 1, 1)), substr(me, 2, nchar(me)), sep = "")
-    dir.create(paste(getwd(), "/", ME, "/plots", sep = ""))
+    message("Creando y guardando los gráficos...")
+    pb <- txtProgressBar(max = 10, style = 3)
+    dir.create(paste(getwd(), "/", ME, "/plots", sep = ""), showWarnings = F)
     x$edad.rec <- cut(x$Edad, breaks = c(-Inf, 10, 15, 20, 25, 30, 35, 40, 45, 
                                          50, 55, 60, 65, 70, 75, 80, 85, 90, 
                                          Inf), 
@@ -592,9 +594,10 @@
     g1 <- arrangeGrob(pie, bottom = textGrob(fuente1, x = 0, hjust = -0.1, 
                                              vjust = -0.1, 
                                              gp = gpar(fontsize = 10)))
-    ggsave(filename = paste(getwd(), "/", ME, "/plots", "/1 Pastel.png", 
-                            sep = ""),
-              g1)
+    suppressMessages(ggsave(filename = paste(getwd(), "/", ME, "/plots",
+                                           "/1 Pastel.png", sep = ""),
+              g1))
+    setTxtProgressBar(pb, i)
     x.na$Sexo %<>% as.numeric()
     x.paciente <- aggregate(x = x.na[, c(1, 2, 19)], by = list(ID = x.na$ID), 
                             FUN = function(x) c(m = min(x), l = length(x), 
@@ -633,10 +636,11 @@
     g2 <- arrangeGrob(barras, bottom = textGrob(fuente1, x = 0, hjust = -0.1, 
                                                 vjust = -0.1, 
                                                 gp = gpar(fontsize = 10)))
-    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+    suppressMessages(ggsave(filename = paste(getwd(), "/", ME, "/plots", 
                             "/2 Histograma prescripciones.png", 
                             sep = ""),
-           g2)
+           g2))
+    setTxtProgressBar(pb, i)
     x.sexoedad <- aggregate(x = x.na, by = list(Edad = x.na$edad.rec, 
                                                 Sexo = x.na$Sexo), 
                             FUN = length)[, c(1, 2, 18)]
@@ -671,10 +675,11 @@
     g3 <- arrangeGrob(piramide, bottom = textGrob(fuente1, x = 0, hjust = -0.1, 
                                                   vjust = -0.1, 
                                                   gp = gpar(fontsize = 10)))
-    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+    suppressMessages(ggsave(filename = paste(getwd(), "/", ME, "/plots", 
                             "/3 Piramide.png", 
                             sep = ""),
-           g3)
+           g3))
+    setTxtProgressBar(pb, i)
     i <- i + 1
     media.edad <- ggplot(data = x.edad, aes(x = Edad, y = promedio, group = 1)) + 
       geom_point(size = 2.5) + 
@@ -688,10 +693,11 @@
     g4 <- arrangeGrob(media.edad, bottom = textGrob(fuente1, x = 0, 
                                                     hjust = -0.1, vjust = -0.1, 
                                                     gp = gpar(fontsize = 10)))
-    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+    suppressMessages(ggsave(filename = paste(getwd(), "/", ME, "/plots", 
                             "/4 Dosis promedio.png", 
                             sep = ""),
-           g4)
+           g4))
+    setTxtProgressBar(pb, i)
     x.tiempo <- aggregate(x = x.na[, 1], by = list(Mes = x.na$Mes, 
                                                    Ano = x.na$Ano), FUN = length)
     x.tiempo$tiempo <- ymd(paste(x.tiempo$Ano, x.tiempo$Mes, 1))
@@ -710,10 +716,11 @@
                                                       hjust = -0.1, 
                                                       vjust = -0.1, 
                                                       gp = gpar(fontsize = 10)))
-    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+    suppressMessages(ggsave(filename = paste(getwd(), "/", ME, "/plots", 
                             "/5 Serie de tiempo.png", 
                             sep = ""),
-           g5)
+           g5))
+    setTxtProgressBar(pb, i)
     i <- i + 1
     p.ano <- ggplot(data = x.tiempo, aes(x = Ano, y = x)) + 
       geom_col(fill = "brown") + 
@@ -725,10 +732,11 @@
     g6 <- arrangeGrob(p.ano, bottom = textGrob(fuente1, x = 0, hjust = -0.1, 
                                                 vjust = -0.1, 
                                                 gp = gpar(fontsize = 10)))
-    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+    suppressMessages(ggsave(filename = paste(getwd(), "/", ME, "/plots", 
                             "/6 Prescripciones anuales.png", 
                             sep = ""),
-           g6)
+           g6))
+    setTxtProgressBar(pb, i)
     i <- i + 1
     barras.ddd <- ggplot(data = x.ddd, aes(x = edad.rec, y = mg)) +
       geom_col(fill = "brown") + 
@@ -742,10 +750,11 @@
     g7 <- arrangeGrob(barras.ddd, bottom = textGrob(fuente1, x = 0, 
                                                     hjust = -0.1, vjust = -0.1, 
                                                     gp = gpar(fontsize = 10)))
-    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+    suppressMessages(ggsave(filename = paste(getwd(), "/", ME, "/plots", 
                             "/7 DDD por edad.png", 
                             sep = ""),
-           g7)
+           g7))
+    setTxtProgressBar(pb, i)
     i <- i + 1
     dispersion <- ggplot(data = x.ddd, aes(x = x.ddd$mg, y = x.ddd$Prescripciones)) +
       geom_point() +
@@ -760,10 +769,11 @@
     g8 <- arrangeGrob(dispersion, bottom = textGrob(fuente1, x = 0, 
                                                     hjust = -0.1, vjust = -0.1, 
                                                     gp = gpar(fontsize = 10)))
-    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+    suppressMessages(ggsave(filename = paste(getwd(), "/", ME, "/plots", 
                             "/8 Dispersion DDD.png", 
                             sep = ""),
-           g8)
+           g8))
+    setTxtProgressBar(pb, i)
     x.medico <- aggregate(x = x.na$mg, by = list(Medico = x.na$Medico), FUN = function(x) c(length(x), sum(x > DDD)))
     x.medico$ddd <- x.medico$x[, 2]
     x.medico$x <- x.medico$x[, 1]
@@ -785,10 +795,11 @@
                     ":\nPorcentaje de prescripciones de ", me, " emitidas por un cierto\n porcentaje de médicos, en Costa Rica, entre el 2011 y el 2015", 
                     sep = ""))
     g9 <- arrangeGrob(medicos.por, bottom = textGrob(fuente1, x = 0, hjust = -0.1, vjust = -0.1, gp = gpar(fontsize = 10)))
-    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+    suppressMessages(ggsave(filename = paste(getwd(), "/", ME, "/plots", 
                             "/9 Medicos DDD.png", 
                             sep = ""),
-           g9)
+           g9))
+    setTxtProgressBar(pb, i)
     i <- i + 1
     dispersion.m <- ggplot(data = x.medico, aes(x = x.medico$ddd, y = x.medico$x)) +
       geom_point() +
@@ -804,10 +815,26 @@
                                                        hjust = -0.1, 
                                                        vjust = -0.1, 
                                                        gp = gpar(fontsize = 10)))
-    ggsave(filename = paste(getwd(), "/", ME, "/plots", 
+    suppressMessages(ggsave(filename = paste(getwd(), "/", ME, "/plots", 
                             "/10 Dispersion medicos.png", 
                             sep = ""),
-           g10)
+           g10))
+    setTxtProgressBar(pb, i)
+    close(pb)
+  }
+  
+  # Esta función sirve para cargar datos de forma más fácil:
+  
+  cargar <- function(medicamento) {
+    m.validos <- c("clobazam", "clonazepam", "diazepan", "fenobarbital", 
+                   "lorazepan", "midazolan", "tiopental")
+    me <- tolower(medicamento)
+    if(!me %in% m.validos) {
+      stop(paste(me, " no es un medicamento válido.", sep = ""))
+    }
+    ME <- paste(toupper(substr(me, 1, 1)), substr(me, 2, nchar(me)), sep = "")
+    x <- readRDS(paste(getwd(), "/", ME, "/data", "/", ME, ".rds", sep = ""))
+    return(x)
   }
   
 ##FIN##=========================================================================

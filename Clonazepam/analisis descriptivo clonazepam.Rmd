@@ -185,7 +185,7 @@ grid.draw(g10)
 ```
 
   Como se puede notar de la Figura `r i`, la cantidad de prescripciones de clonazepam ha ido aumentando conforme pasan los años, lo que concuerda con lo observado en la Figura `r i - 1`. De igual forma, se puede ver que la cantidad de prescripciones se ha cuadruplicado desde el 2011 al 2015, es decir, un período de 5 años.
-
+  
 #Pacientes y prescripciones mayores a la DDD
 
   Es importante notar que, para el caso de clonazepam, la dosis diaria definida (DDD) es de 8 mg, lo que significa que una dosis mayor a 8 mg puede ser peligrosa, por lo que es de interés investigar este tipo de prescripciones. Ahora, de un total de `r nrow(clon.paciente)` pacientes, sólo `r nrow(clon.ddd)`, equivalente a un `r round(nrow(clon.ddd)/nrow(clon.paciente) * 100, 2)`% del total, recibieron al menos una prescripción mayor a la DDD. Además, un `r round(sum(clon.ddd$prescripciones) / 701795 * 100, 2)`% del total de prescripciones fueron dadas con dosis mayores a la DDD, lo que indica que hay pacientes que están recibiendo consistentemente dosis mayores a la recomendada. Relacionado a lo anterior, un `r round(sum(clon.ddd$mg > 1) / nrow(clon.ddd) * 100, 2)`% de los pacientes con al menos una prescripcion mayor a la DDD tienen más de una prescripción de este tipo. Estos pacientes, en total, tienen un `r round(sum(clon.ddd$mg[clon.ddd$mg > 1]) / sum(clon.ddd$mg) * 100, 2)`% del total de prescripciones mayores a la DDD, lo que significa que hay una aglomeración considerable de prescripciones mayores a la DDD en unos pocos pacientes.
@@ -226,6 +226,11 @@ grid.draw(g9)
 ```
 
   Ahora, con respecto a la Figura `r i`, la línea roja se refiere al punto en el cual la cantidad de prescripciones del paciente es igual a la cantidad de prescripciones por con dosis por encima de la DDD; es decir, puntos sobre la línea roja han tenido todas sus prescripciones por encima de la DDD. Como se puede notar, hay una cantidad considerable de puntos cercanos a la línea roja, sobre todo si solo tomamos en cuenta aquellas personas que tienen una cantidad alta de prescripciones por encima de la DDD, esto parece indicar que las personas con una cantidad alta de dosis por encima de la DDD han recibido la totalidad de sus prescripciones de esa forma. Luego, en los pacientes con una alta cantidad de prescripciones recetadas se puede ver que casi no hay prescripciones por encima de la DDD.
+  
+```{r pacientes en varias areas de salud}
+clon.par <- aggregate(x = clon.na$unidad.ejecutora, by = list(Año = clon.na$año, Mes = clon.na$mes, ID = clon.na$ID), FUN = function(x) length(unique(x)))
+clon.par1 <- clon.par[which(clon.par$x > 1), ]
+```
   
 # Médicos
 
