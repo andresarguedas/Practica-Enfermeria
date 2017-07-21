@@ -490,7 +490,7 @@
                                                          "texto.a.numero", 
                                                          "fraccion.a.numero")) %dopar% {
       extraer.numeros(x$Indicacion[i])
-    }
+                                             }
     stopImplicitCluster()
     colnames(x)[(K + 1):(K + 2)] <- c("Dosis", "Frecuencia")
     remove(K)
@@ -527,13 +527,14 @@
       x[v.extremos, c(11, 17, 18)] %<>% edit()
     }
     remove(h, v.extremos)
+    x$Dosis[which(x$Dosis == 999)] <- NA
+    x$Frecuencia[which(x$Frecuencia == 999)] <- NA
     return(x)
   }
   
-  # Esta función crea todos los gráficos necesarios con su respectivo título y
-  # fuente y los guarda en una carpeta:
+  # Esta función sirve para cargar datos de forma más fácil:
   
-  graficos <- function(x, medicamento, DDD) {
+  cargar <- function(medicamento) {
     m.validos <- c("clobazam", "clonazepam", "diazepan", "fenobarbital", 
                    "lorazepan", "midazolan", "tiopental")
     me <- tolower(medicamento)
@@ -541,6 +542,20 @@
       stop(paste(me, " no es un medicamento válido.", sep = ""))
     }
     ME <- paste(toupper(substr(me, 1, 1)), substr(me, 2, nchar(me)), sep = "")
+    x <- readRDS(paste(getwd(), "/", ME, "/data", "/", ME, ".rds", sep = ""))
+    return(x)
+  }
+  
+  # Esta función crea todos los gráficos necesarios con su respectivo título y
+  # fuente y los guarda en una carpeta:
+  
+  graficos <- function(medicamento) {
+    x <- cargar(medicamento)
+    x <- na.omit(x)
+    me <- tolower(medicamento)
+    ME <- paste(toupper(substr(me, 1, 1)), substr(me, 2, nchar(me)), sep = "")
+    ml <- list(clobazam = 20, clonazepam = 8, midazolan = 15, lorazepan = 2.5)
+    DDD <- as.numeric(ml[me])
     message("Creando y guardando los gráficos...")
     pb <- txtProgressBar(max = 10, style = 3)
     dir.create(paste(getwd(), "/", ME, "/plots", sep = ""), showWarnings = F)
@@ -821,20 +836,6 @@
            g10))
     setTxtProgressBar(pb, i)
     close(pb)
-  }
-  
-  # Esta función sirve para cargar datos de forma más fácil:
-  
-  cargar <- function(medicamento) {
-    m.validos <- c("clobazam", "clonazepam", "diazepan", "fenobarbital", 
-                   "lorazepan", "midazolan", "tiopental")
-    me <- tolower(medicamento)
-    if(!me %in% m.validos) {
-      stop(paste(me, " no es un medicamento válido.", sep = ""))
-    }
-    ME <- paste(toupper(substr(me, 1, 1)), substr(me, 2, nchar(me)), sep = "")
-    x <- readRDS(paste(getwd(), "/", ME, "/data", "/", ME, ".rds", sep = ""))
-    return(x)
   }
   
 ##FIN##=========================================================================
