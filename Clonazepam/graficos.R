@@ -1,8 +1,8 @@
 x <- c("ggplot2", "scales", "gridExtra", "grid", "magrittr", "plyr", "cowplot", "lubridate", "knitr")
 sapply(x, library, character.only = T)
 remove(x)
-source("F:/Proyecto enfermeria/Practica-Enfermeria/Funciones.R")
-clon <- readRDS(file = paste(getwd(), "/data/clonazepam.rds", sep = ""))
+source("Funciones.R")
+clon <- readRDS(file = paste(getwd(), "/Clonazepam/data/clonazepam.rds", sep = ""))
 clon$edad.rec <- cut(clon$edad, breaks = c(-Inf, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, Inf), labels = c("0 a 10", "11 a 15", "16 a 20", "21 a 25", "26 a 30", "31 a 35", "36 a 40", "41 a 45", "46 a 50", "51 a 55", "56 a 60", "61 a 65", "66 a 70", "71 a 75", "76 a 80", "81 a 85", "86 a 90", "Más de 91"))
 clon.na <- na.omit(clon)
 theme1 <- theme(axis.text.x = element_text(size = 11 * 0.8), axis.text.y = element_text(size = 11 * 0.8), axis.title.x = element_text(size = 11), axis.title.y = element_text(size = 11), plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
@@ -72,6 +72,11 @@ medicos.por <- ggplot(data = v1, aes(x = V1, y = V2)) +
   ylab("Porcentaje de prescripciones emitidas") +
   theme1 +
   ggtitle(paste("Figura ", i, ":\nPorcentaje de prescripciones de clonazepam emitidas por un cierto\n porcentaje de médicos, en Costa Rica, entre el 2011 y el 2015", sep = ""))
+g9 <- arrangeGrob(medicos.por, bottom = textGrob(fuente1, x = 0, hjust = -0.1, vjust = -0.1, gp = gpar(fontsize = 10)))
+
+x11(height = 4, width = 8)
+grid.draw(g9)
+
 
 bp <- ggplot(df1, aes(x = "", y = porcentaje, fill = sexo)) + geom_bar(width = 1, stat = "identity")
 pie <- bp + coord_polar("y", start = 0)
@@ -98,6 +103,7 @@ barras <- ggplot(data = clon.edad, aes(x = Edad, y = x)) +
 
 g3 <- arrangeGrob(barras, bottom = textGrob(fuente1, x = 0, hjust = -0.1, vjust = -0.1, gp = gpar(fontsize = 10)))
 
+x11(height = 4)
 grid.draw(g3)
 
 i <- i + 1
@@ -119,6 +125,7 @@ piramide <- ggplot(clon.sexoedad, aes(x = Edad, y = Prescripciones, fill = Sexo)
 
 g2 <- arrangeGrob(piramide, bottom = textGrob(fuente1, x = 0, hjust = -0.1, vjust = -0.1, gp = gpar(fontsize = 10)))
 
+x11(height = 4)
 grid.draw(g2)
 
 i <- i + 1
@@ -133,7 +140,9 @@ media.edad <- ggplot(data = clon.edad, aes(x = Edad, y = promedio, group = 1)) +
 
 g4 <- arrangeGrob(media.edad, bottom = textGrob(fuente1, x = 0, hjust = -0.1, vjust = -0.1, gp = gpar(fontsize = 10)))
 
+x11(height = 4)
 grid.draw(g4)
+
 clon.tiempo <- aggregate(x = clon.na[, 1], by = list(Mes = clon.na$mes, Año = clon.na$año), FUN = length)
 clon.tiempo$tiempo <- ymd(paste(clon.tiempo$Año, clon.tiempo$Mes, 1))
 
@@ -149,6 +158,7 @@ serie.tiempo <- ggplot(data = clon.tiempo, aes(x = tiempo, y = x)) +
 
 g5 <- arrangeGrob(serie.tiempo, bottom = textGrob(fuente1, x = 0, hjust = -0.1, vjust = -0.1, gp = gpar(fontsize = 10)))
 
+x11(height = 4)
 grid.draw(g5)
 i <- i + 1
 
